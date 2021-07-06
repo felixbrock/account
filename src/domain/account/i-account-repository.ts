@@ -7,5 +7,9 @@ export interface AccountQueryDto {
 
 export interface IAccountRepository {
   findOne(id: string): Promise<Account | null>;
+  findBy(
+    accountQueryDto: AccountQueryDto
+  ): Promise<Account[]>;
+  all(): Promise<Account[]>;
   save(account: Account): Promise<Result<null>>;
 }

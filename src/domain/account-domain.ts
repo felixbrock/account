@@ -1,10 +1,13 @@
 import { CreateAccount } from './account/create-account';
 import { ReadAccount } from './account/read-account';
+import { ReadAccounts } from './account/read-accounts';
 
 export default class AccountDomain {
   #createAccount: CreateAccount;
   
   #readAccount: ReadAccount;
+
+  #readAccounts: ReadAccounts;
 
   public get createAccount(): CreateAccount {
     return this.#createAccount;
@@ -14,11 +17,17 @@ export default class AccountDomain {
     return this.#readAccount;
   }
 
+  public get readAccounts(): ReadAccounts {
+    return this.#readAccounts;
+  }
+
   constructor(
     createAccount: CreateAccount,
     readAccount: ReadAccount,
+    readAccounts: ReadAccounts,
   ) {
     this.#createAccount = createAccount;
     this.#readAccount = readAccount;
+    this.#readAccounts = readAccounts;
   }
 }

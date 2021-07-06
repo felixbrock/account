@@ -4,6 +4,7 @@ import AccountDomain from '../domain/account-domain';
 
 import { CreateAccount } from '../domain/account/create-account';
 import { ReadAccount } from '../domain/account/read-account';
+import { ReadAccounts } from '../domain/account/read-accounts';
 
 import AccountRepository from './persistence/account-repository';
 
@@ -14,6 +15,7 @@ iocRegister.register({
 
   createAccount: asClass(CreateAccount),
   readAccount: asClass(ReadAccount),
+  readAccounts: asClass(ReadAccounts),
 
   accountRepository: asClass(AccountRepository),
 });

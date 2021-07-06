@@ -1,9 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Account, AccountProperties } from '../../domain/entities/account';
-import {
-  IAccountRepository,
-} from '../../domain/account/i-account-repository';
+import { AccountQueryDto, IAccountRepository } from '../../domain/account/i-account-repository';
 import Result from '../../domain/value-types/transient-types/result';
 
 interface AccountPersistence {
@@ -25,6 +23,57 @@ export default class AccountRepositoryImpl implements IAccountRepository {
 
     if (!result) return null;
     return this.#toEntity(this.#buildProperties(result));
+  }
+
+  public async findBy(
+    accountQueryDto: AccountQueryDto
+  ): Promise<Account[]> {
+    if (!Object.keys(accountQueryDto).length) return this.all();
+
+    const data: string = fs.readFileSync(
+      path.resolve(__dirname, '../../../db.json'),
+      'utf-8'
+    );
+    const db = JSON.parse(data);
+
+    const accounts: AccountPersistence[] = db.accounts.filter(
+      (accountEntity: AccountPersistence) =>
+        this.#findByCallback(accountEntity, accountQueryDto)
+    );
+
+    if (!accounts || !!accounts.length) return [];
+    return accounts.map((account: AccountPersistence) =>
+      this.#toEntity(this.#buildProperties(account))
+    );
+  }
+
+  #findByCallback = (
+    accountEntity: AccountPersistence,
+    accountQueryDto: AccountQueryDto
+  ): boolean => {
+    const userIdMatch = accountQueryDto.userId
+      ? accountEntity.userId ===
+        accountQueryDto.userId
+      : true;
+
+    return (
+      userIdMatch
+    );
+  }
+
+  public async all(): Promise<Account[]> {
+    const data: string = fs.readFileSync(
+      path.resolve(__dirname, '../../../db.json'),
+      'utf-8'
+    );
+    const db = JSON.parse(data);
+
+    const { accounts } = db;
+
+    if (!accounts || !!accounts.length) return [];
+    return accounts.map((account: AccountPersistence) =>
+      this.#toEntity(this.#buildProperties(account))
+    );
   }
 
   public async save(account: Account): Promise<Result<null>> {
