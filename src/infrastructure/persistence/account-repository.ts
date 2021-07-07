@@ -7,6 +7,7 @@ import Result from '../../domain/value-types/transient-types/result';
 interface AccountPersistence {
   id: string;
   userId: string;
+  modifiedOn: number;
 }
 
 export default class AccountRepositoryImpl implements IAccountRepository {
@@ -55,9 +56,11 @@ export default class AccountRepositoryImpl implements IAccountRepository {
       ? accountEntity.userId ===
         accountQueryDto.userId
       : true;
-
+      const modifiedOnMatch = accountQueryDto.modifiedOn
+      ? accountEntity.modifiedOn === accountQueryDto.modifiedOn
+      : true;
     return (
-      userIdMatch
+      userIdMatch && modifiedOnMatch
     );
   }
 
@@ -111,10 +114,12 @@ export default class AccountRepositoryImpl implements IAccountRepository {
   #buildProperties = (account: AccountPersistence): AccountProperties => ({
     id: account.id,
     userId: account.userId,
+    modifiedOn: account.modifiedOn,
   });
 
   #toPersistence = (account: Account): AccountPersistence => ({
     id: account.id,
     userId: account.userId,
+    modifiedOn: account.modifiedOn,
   });
 }

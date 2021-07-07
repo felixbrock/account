@@ -17,9 +17,9 @@ export default class ReadAccountsController extends BaseController {
   }
 
   #buildRequestDto = (httpRequest: Request): Result<ReadAccountsRequestDto> => {
-    const { userId } = httpRequest.query;
+    const { userId, modifiedOn } = httpRequest.query;
 
-    const requestValid = this.#queryParametersValid([userId]);
+    const requestValid = this.#queryParametersValid([userId, modifiedOn]);
     if (!requestValid)
       return Result.fail<ReadAccountsRequestDto>(
         'Request query parameter are supposed to be in string format'
@@ -28,6 +28,8 @@ export default class ReadAccountsController extends BaseController {
     try {
       return Result.ok<ReadAccountsRequestDto>({
         userId: typeof userId === 'string' ? userId : undefined,
+        modifiedOn:
+          typeof modifiedOn === 'string' ? parseInt(modifiedOn, 10) : undefined,
       });
     } catch (error) {
       return Result.fail<ReadAccountsRequestDto>(error.message);
