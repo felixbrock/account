@@ -29,6 +29,7 @@ export default class AccountRepositoryImpl implements IAccountRepository {
   public async findBy(
     accountQueryDto: AccountQueryDto
   ): Promise<Account[]> {
+    
     if (!Object.keys(accountQueryDto).length) return this.all();
 
     const data: string = fs.readFileSync(
@@ -42,7 +43,7 @@ export default class AccountRepositoryImpl implements IAccountRepository {
         this.#findByCallback(accountEntity, accountQueryDto)
     );
 
-    if (!accounts || !!accounts.length) return [];
+    if (!accounts || !accounts.length) return [];
     return accounts.map((account: AccountPersistence) =>
       this.#toEntity(this.#buildProperties(account))
     );
@@ -56,11 +57,14 @@ export default class AccountRepositoryImpl implements IAccountRepository {
       ? accountEntity.userId ===
         accountQueryDto.userId
       : true;
-      const modifiedOnMatch = accountQueryDto.modifiedOn
-      ? accountEntity.modifiedOn === accountQueryDto.modifiedOn
+      const modifiedOnStartMatch = accountQueryDto.modifiedOnStart
+      ? accountEntity.modifiedOn >= accountQueryDto.modifiedOnStart
+      : true;
+      const modifiedOnEndMatch = accountQueryDto.modifiedOnEnd
+      ? accountEntity.modifiedOn <= accountQueryDto.modifiedOnEnd
       : true;
     return (
-      userIdMatch && modifiedOnMatch
+      userIdMatch && modifiedOnStartMatch && modifiedOnEndMatch
     );
   }
 
@@ -73,7 +77,7 @@ export default class AccountRepositoryImpl implements IAccountRepository {
 
     const { accounts } = db;
 
-    if (!accounts || !!accounts.length) return [];
+    if (!accounts || !accounts.length) return [];
     return accounts.map((account: AccountPersistence) =>
       this.#toEntity(this.#buildProperties(account))
     );

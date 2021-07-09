@@ -3,7 +3,8 @@ import Result from '../value-types/transient-types/result';
 
 export interface AccountQueryDto {
   userId?: string;
-  modifiedOn?: number;
+  modifiedOnStart?: number;
+  modifiedOnEnd?: number;
 }
 
 export interface IAccountRepository {

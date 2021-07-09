@@ -17,19 +17,45 @@ export default class ReadAccountsController extends BaseController {
   }
 
   #buildRequestDto = (httpRequest: Request): Result<ReadAccountsRequestDto> => {
-    const { userId, modifiedOn } = httpRequest.query;
+    const { userId, modifiedOnStart, modifiedOnEnd, timezoneOffset } =
+      httpRequest.query;
 
-    const requestValid = this.#queryParametersValid([userId, modifiedOn]);
+    const requestValid = this.#queryParametersValid([
+      userId,
+      modifiedOnStart,
+      modifiedOnEnd,
+      timezoneOffset,
+    ]);
     if (!requestValid)
-      return Result.fail<ReadAccountsRequestDto>(
+      throw new Error(
         'Request query parameter are supposed to be in string format'
+      );
+
+    const startTime = '00:00:00';
+    const endTime = '23:59:59';
+
+    if (
+      typeof timezoneOffset === 'string' &&
+      timezoneOffset.indexOf('-') === -1 &&
+      timezoneOffset.indexOf('+') === -1
+    )
+      throw new Error(
+        `TimezoneOffset is not in correct format. '-' or '+' missing. Make sure to use URL encoding ('-'; '%2B' for '+' character)`
       );
 
     try {
       return Result.ok<ReadAccountsRequestDto>({
         userId: typeof userId === 'string' ? userId : undefined,
-        modifiedOn:
-          typeof modifiedOn === 'string' ? parseInt(modifiedOn, 10) : undefined,
+        modifiedOnStart:
+          typeof modifiedOnStart === 'string'
+            ? Date.parse(
+                `${modifiedOnStart} ${startTime} ${timezoneOffset || ''}`
+              )
+            : undefined,
+        modifiedOnEnd:
+          typeof modifiedOnEnd === 'string'
+            ? Date.parse(`${modifiedOnEnd} ${endTime} ${timezoneOffset || ''}`)
+            : undefined,
       });
     } catch (error) {
       return Result.fail<ReadAccountsRequestDto>(error.message);

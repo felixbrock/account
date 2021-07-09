@@ -6,7 +6,8 @@ import {AccountDto, buildAccountDto } from './account-dto';
 
 export interface ReadAccountsRequestDto {
   userId?: string;
-  modifiedOn?: number;
+  modifiedOnStart?: number;
+  modifiedOnEnd?: number;
 }
 
 export type ReadAccountsResponseDto = Result<AccountDto[] | null>;
@@ -34,8 +35,6 @@ export class ReadAccounts
     }
   }
 
-
-
   #buildAccountQueryDto = (
     request: ReadAccountsRequestDto
   ): AccountQueryDto => 
@@ -44,7 +43,8 @@ export class ReadAccounts
     const queryDto : AccountQueryDto = {};
 
     if(request.userId) queryDto.userId = request.userId;
-    if(request.modifiedOn) queryDto.modifiedOn = request.modifiedOn;
+    if(request.modifiedOnStart) queryDto.modifiedOnStart = request.modifiedOnStart;
+    if(request.modifiedOnEnd) queryDto.modifiedOnEnd = request.modifiedOnEnd;
     
     return queryDto;
   };
