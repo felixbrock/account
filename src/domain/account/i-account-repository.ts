@@ -13,5 +13,5 @@ export interface IAccountRepository {
     accountQueryDto: AccountQueryDto
   ): Promise<Account[]>;
   all(): Promise<Account[]>;
-  save(account: Account): Promise<Result<null>>;
+  insertOne(account: Account): Promise<Result<null>>;
 }

@@ -1,104 +1,100 @@
-import fs from 'fs';
-import path from 'path';
+import { Document, FindCursor, InsertOneResult, ObjectId } from 'mongodb';
 import { Account, AccountProperties } from '../../domain/entities/account';
-import { AccountQueryDto, IAccountRepository } from '../../domain/account/i-account-repository';
+import {
+  AccountQueryDto,
+  IAccountRepository,
+} from '../../domain/account/i-account-repository';
 import Result from '../../domain/value-types/transient-types/result';
+import { close, connect, createClient } from './db/mongo-db';
 
 interface AccountPersistence {
-  id: string;
+  _id: string;
   userId: string;
   modifiedOn: number;
 }
 
-export default class AccountRepositoryImpl implements IAccountRepository {
-  public async findOne(id: string): Promise<Account | null> {
-    const data: string = fs.readFileSync(
-      path.resolve(__dirname, '../../../db.json'),
-      'utf-8'
-    );
-    const db = JSON.parse(data);
+const collectionName = 'accounts';
 
-    const result: AccountPersistence = db.accounts.find(
-      (accountEntity: { id: string }) => accountEntity.id === id
-    );
+export default class AccountRepositoryImpl implements IAccountRepository {
+  
+  public findOne = async (id: string): Promise<Account | null> => {
+    const client = createClient();
+    const db = await connect(client);
+    const result: any = await db
+      .collection(collectionName)
+      .findOne({ _id: new ObjectId(id) });
+
+    close(client);
 
     if (!result) return null;
-    return this.#toEntity(this.#buildProperties(result));
-  }
 
-  public async findBy(
+    return this.#toEntity(this.#buildProperties(result));
+  };
+
+  public findBy = async (
     accountQueryDto: AccountQueryDto
-  ): Promise<Account[]> {
-    
+  ): Promise<Account[]> => {
     if (!Object.keys(accountQueryDto).length) return this.all();
 
-    const data: string = fs.readFileSync(
-      path.resolve(__dirname, '../../../db.json'),
-      'utf-8'
+    const client = createClient();
+    const db = await connect(client);
+    const result: FindCursor = await db
+      .collection(collectionName)
+      .find(this.#buildFilter(accountQueryDto));
+    const results = await result.toArray();
+
+    close(client);
+
+    if (!results || !results.length) return [];
+
+    return results.map((element: any) =>
+      this.#toEntity(this.#buildProperties(element))
     );
-    const db = JSON.parse(data);
+  };
 
-    const accounts: AccountPersistence[] = db.accounts.filter(
-      (accountEntity: AccountPersistence) =>
-        this.#findByCallback(accountEntity, accountQueryDto)
+  #buildFilter = (accountQueryDto: AccountQueryDto): any => {
+    const filter: { [key: string]: any } = {};
+
+    if (accountQueryDto.userId) filter.userId = accountQueryDto.userId;
+
+    const modifiedOnFilter: { [key: string]: number } = {};
+    if (accountQueryDto.modifiedOnStart)
+      modifiedOnFilter.$gte = accountQueryDto.modifiedOnStart;
+    if (accountQueryDto.modifiedOnEnd)
+      modifiedOnFilter.$lte = accountQueryDto.modifiedOnEnd;
+    if (Object.keys(modifiedOnFilter).length)
+      filter.modifiedOn = modifiedOnFilter;
+
+    return filter;
+  };
+
+  public all = async (): Promise<Account[]> => {
+    const client = createClient();
+    const db = await connect(client);
+    const result: FindCursor = await db.collection(collectionName).find();
+    const results = await result.toArray();
+
+    close(client);
+
+    if (!results || !results.length) return [];
+
+    return results.map((element: any) =>
+      this.#toEntity(this.#buildProperties(element))
     );
+  };
 
-    if (!accounts || !accounts.length) return [];
-    return accounts.map((account: AccountPersistence) =>
-      this.#toEntity(this.#buildProperties(account))
-    );
-  }
-
-  #findByCallback = (
-    accountEntity: AccountPersistence,
-    accountQueryDto: AccountQueryDto
-  ): boolean => {
-    const userIdMatch = accountQueryDto.userId
-      ? accountEntity.userId ===
-        accountQueryDto.userId
-      : true;
-      const modifiedOnStartMatch = accountQueryDto.modifiedOnStart
-      ? accountEntity.modifiedOn >= accountQueryDto.modifiedOnStart
-      : true;
-      const modifiedOnEndMatch = accountQueryDto.modifiedOnEnd
-      ? accountEntity.modifiedOn <= accountQueryDto.modifiedOnEnd
-      : true;
-    return (
-      userIdMatch && modifiedOnStartMatch && modifiedOnEndMatch
-    );
-  }
-
-  public async all(): Promise<Account[]> {
-    const data: string = fs.readFileSync(
-      path.resolve(__dirname, '../../../db.json'),
-      'utf-8'
-    );
-    const db = JSON.parse(data);
-
-    const { accounts } = db;
-
-    if (!accounts || !accounts.length) return [];
-    return accounts.map((account: AccountPersistence) =>
-      this.#toEntity(this.#buildProperties(account))
-    );
-  }
-
-  public async save(account: Account): Promise<Result<null>> {
-    const data: string = fs.readFileSync(
-      path.resolve(__dirname, '../../../db.json'),
-      'utf-8'
-    );
-    const db = JSON.parse(data);
-
+  public insertOne = async (account: Account): Promise<Result<null>> => {
     try {
-      db.accounts.push(this.#toPersistence(account));
-
-      fs.writeFileSync(
-        path.resolve(__dirname, '../../../db.json'),
-        JSON.stringify(db),
-        'utf-8'
-      );
-
+      const client = createClient();
+    const db = await connect(client);
+      const result: InsertOneResult<Document> = await db
+        .collection(collectionName)
+        .insertOne(this.#toPersistence(account));
+      
+      if(!result.acknowledged) throw new Error('Account creation failed. Insert not acknowledged');
+  
+      close(client);
+      
       return Result.ok<null>();
     } catch (error) {
       return Result.fail<null>(error.message);
@@ -116,13 +112,14 @@ export default class AccountRepositoryImpl implements IAccountRepository {
   };
 
   #buildProperties = (account: AccountPersistence): AccountProperties => ({
-    id: account.id,
+    // eslint-disable-next-line no-underscore-dangle
+    id: account._id,
     userId: account.userId,
     modifiedOn: account.modifiedOn,
   });
 
-  #toPersistence = (account: Account): AccountPersistence => ({
-    id: account.id,
+  #toPersistence = (account: Account): Document => ({
+    _id: ObjectId.createFromHexString(account.id),
     userId: account.userId,
     modifiedOn: account.modifiedOn,
   });

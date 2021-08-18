@@ -1,7 +1,6 @@
 // TODO Violation of Dependency Rule
-import { v4 as uuidv4 } from 'uuid';
+import { ObjectId } from 'mongodb';
 import IUseCase from '../services/use-case';
-import Id from '../value-types/id';
 import { Account, AccountProperties } from '../entities/account';
 import { buildAccountDto, AccountDto } from './account-dto';
 import { IAccountRepository } from './i-account-repository';
@@ -39,7 +38,7 @@ export class CreateAccount
         );
 
       // TODO Install error handling
-      await this.#accountRepository.save(account.value);
+      await this.#accountRepository.insertOne(account.value);
 
       return Result.ok<AccountDto>(buildAccountDto(account.value));
     } catch (error) {
@@ -51,7 +50,7 @@ export class CreateAccount
     request: CreateAccountRequestDto
   ): Result<Account | null> => {
     const accountProperties: AccountProperties = {
-      id: Id.next(uuidv4).id,
+      id: new ObjectId().toHexString(),
       userId: request.userId,
     };
 
