@@ -31,7 +31,7 @@ export class ReadAccounts
         accounts.map((account) => buildAccountDto(account))
       );
     } catch (error) {
-      return Result.fail<null>(error.message);
+      return Result.fail<null>(typeof error === 'string' ? error : error.message);
     }
   }
 

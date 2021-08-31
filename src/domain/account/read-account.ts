@@ -34,7 +34,7 @@ export class ReadAccount
         buildAccountDto(account)
       );
     } catch (error) {
-      return Result.fail<null>(error.message);
+      return Result.fail<null>(typeof error === 'string' ? error : error.message);
     }
   }
 }

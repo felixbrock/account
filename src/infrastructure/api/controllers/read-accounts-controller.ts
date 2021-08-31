@@ -44,7 +44,7 @@ export default class ReadAccountsController extends BaseController {
             : undefined,
       });
     } catch (error) {
-      return Result.fail<ReadAccountsRequestDto>(error.message);
+      return Result.fail<ReadAccountsRequestDto>(typeof error === 'string' ? error : error.message);
     }
   };
 

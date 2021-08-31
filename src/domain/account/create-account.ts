@@ -42,7 +42,7 @@ export class CreateAccount
 
       return Result.ok<AccountDto>(buildAccountDto(account.value));
     } catch (error) {
-      return Result.fail<AccountDto>(error.message);
+      return Result.fail<AccountDto>(typeof error === 'string' ? error : error.message);
     }
   }
 
