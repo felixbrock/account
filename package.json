@@ -36,6 +36,7 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
+    "@aws-sdk/client-servicediscovery": "^3.30.0",
     "awilix": "^4.3.4",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",

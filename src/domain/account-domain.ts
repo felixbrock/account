@@ -21,7 +21,7 @@ export default class AccountDomain {
     return this.#readAccounts;
   }
 
-  constructor(
+  public constructor(
     createAccount: CreateAccount,
     readAccount: ReadAccount,
     readAccounts: ReadAccounts,

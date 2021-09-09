@@ -96,7 +96,7 @@ export default class AccountRepositoryImpl implements IAccountRepository {
       close(client);
       
       return Result.ok<null>();
-    } catch (error) {
+    } catch (error: any) {
       return Result.fail<null>(typeof error === 'string' ? error : error.message);
     }
   }
