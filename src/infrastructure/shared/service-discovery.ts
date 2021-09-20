@@ -3,10 +3,15 @@ import {
   DiscoverInstancesCommand,
 } from '@aws-sdk/client-servicediscovery';
 
-export default async (
+export interface DiscoveredService {
+  ip: string;
+  port: string;
+}
+
+export const discoverService =  async (
   namespaceName: string,
   serviceName: string
-): Promise<string> => {
+): Promise<DiscoveredService> => {
   const client = new ServiceDiscoveryClient({ region: 'eu-central-1' });
 
   const params = {
@@ -31,7 +36,10 @@ export default async (
     if (!attributes)
       throw new Error(`Attributes for ${serviceName} instance do not exist`);
 
-    return attributes.AWS_INSTANCE_IPV4;
+    return {
+      ip: attributes.AWS_INSTANCE_IPV4,
+      port: attributes.AWS_INSTANCE_PORT,
+    };
   } catch (error: any) {
     return Promise.reject(typeof error === 'string' ? error : error.message);
   }
