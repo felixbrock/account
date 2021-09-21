@@ -29,12 +29,8 @@ export default class ReadAccountController extends BaseController {
         return ReadAccountController.badRequest(res, useCaseResult.error);
       }
 
-      return ReadAccountController.ok(
-        res,
-        useCaseResult.value,
-        CodeHttp.OK
-      );
-    } catch (error) {
+      return ReadAccountController.ok(res, useCaseResult.value, CodeHttp.OK);
+    } catch (error: any) {
       return ReadAccountController.fail(res, error);
     }
   }

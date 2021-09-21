@@ -34,7 +34,7 @@ export default class CreateAccountController extends BaseController {
         useCaseResult.value,
         CodeHttp.CREATED
       );
-    } catch (error) {
+    } catch (error: any) {
       return CreateAccountController.fail(res, error);
     }
   }
