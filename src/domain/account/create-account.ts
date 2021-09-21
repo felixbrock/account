@@ -41,7 +41,7 @@ export class CreateAccount
       await this.#accountRepository.insertOne(account.value);
 
       return Result.ok<AccountDto>(buildAccountDto(account.value));
-    } catch (error) {
+    } catch (error: any) {
       return Result.fail<AccountDto>(typeof error === 'string' ? error : error.message);
     }
   }

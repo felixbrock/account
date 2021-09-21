@@ -33,7 +33,7 @@ export class ReadAccount
       return Result.ok<AccountDto>(
         buildAccountDto(account)
       );
-    } catch (error) {
+    } catch (error: any) {
       return Result.fail<null>(typeof error === 'string' ? error : error.message);
     }
   }
