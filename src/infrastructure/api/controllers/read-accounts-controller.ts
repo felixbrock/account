@@ -17,11 +17,12 @@ export default class ReadAccountsController extends BaseController {
   }
 
   #buildRequestDto = (httpRequest: Request): Result<ReadAccountsRequestDto> => {
-    const { userId, modifiedOnStart, modifiedOnEnd, timezoneOffset } =
+    const { userId, organizationId, modifiedOnStart, modifiedOnEnd, timezoneOffset } =
       httpRequest.query;
 
     const requestValid = this.#queryParametersValid([
       userId,
+      organizationId,
       modifiedOnStart,
       modifiedOnEnd,
       timezoneOffset,
@@ -34,6 +35,7 @@ export default class ReadAccountsController extends BaseController {
     try {
       return Result.ok<ReadAccountsRequestDto>({
         userId: typeof userId === 'string' ? userId : undefined,
+        organizationId: typeof organizationId === 'string' ? organizationId : undefined,
         modifiedOnStart:
           typeof modifiedOnStart === 'string'
             ? this.#buildDate(modifiedOnStart)

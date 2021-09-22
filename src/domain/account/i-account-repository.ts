@@ -3,6 +3,7 @@ import Result from '../value-types/transient-types/result';
 
 export interface AccountQueryDto {
   userId?: string;
+  organizationId?: string;
   modifiedOnStart?: number;
   modifiedOnEnd?: number;
 }

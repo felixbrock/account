@@ -10,6 +10,7 @@ import { close, connect, createClient } from './db/mongo-db';
 interface AccountPersistence {
   _id: string;
   userId: string;
+  organizationId: string;
   modifiedOn: number;
 }
 
@@ -56,6 +57,8 @@ export default class AccountRepositoryImpl implements IAccountRepository {
     const filter: { [key: string]: any } = {};
 
     if (accountQueryDto.userId) filter.userId = accountQueryDto.userId;
+    
+    if (accountQueryDto.organizationId) filter.organizationId = accountQueryDto.organizationId;
 
     const modifiedOnFilter: { [key: string]: number } = {};
     if (accountQueryDto.modifiedOnStart)
@@ -115,12 +118,14 @@ export default class AccountRepositoryImpl implements IAccountRepository {
     // eslint-disable-next-line no-underscore-dangle
     id: account._id,
     userId: account.userId,
+    organizationId: account.organizationId,
     modifiedOn: account.modifiedOn,
   });
 
   #toPersistence = (account: Account): Document => ({
     _id: ObjectId.createFromHexString(account.id),
     userId: account.userId,
+    organizationId: account.organizationId,
     modifiedOn: account.modifiedOn,
   });
 }
