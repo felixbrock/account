@@ -9,7 +9,8 @@
     "tsc": "tsc",
     "clean": "rimraf dist",
     "build": "npm run clean && npm run tsc",
-    "start":  "npm run build && node dist/index.js"
+    "start":  "npm run build && node dist/index.js",
+    "deploy": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./deploy.ps1"
   },
   "repository": {
     "type": "git",
