@@ -17,8 +17,9 @@ if ($env -eq 'production') {
 }
 elseif ($env -eq 'test') {
   docker image prune -f
-  # $imagesToDelete = aws ecr list-images --repository-name $serviceName --filter "tagStatus=UNTAGGED" --query 'imageIds[*]' --output json
-  # aws ecr batch-delete-image --repository-name $serviceName --image-ids "$imagesToDelete"
+  $imagesToDelete = aws ecr list-images --repository-name $serviceName --filter "tagStatus=UNTAGGED" --query 'imageIds[*]' --output json
+  $imagesToDelete = $imagesToDelete.replace('"', '""')
+  aws ecr batch-delete-image --repository-name $serviceName --image-ids "$imagesToDelete"
 
   aws ecs update-service --cluster hivedive-test --service "${serviceName}-service" --force-new-deployment
 }
