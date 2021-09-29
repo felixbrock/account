@@ -16,8 +16,8 @@ export default class CreateAccountController extends BaseController {
   }
 
   #buildRequestDto = (httpRequest: Request): CreateAccountRequestDto => ({
-    userId: httpRequest.body.userId,
-    organizationId: httpRequest.body.organizationId
+    userId: httpRequest.body.data.userId,
+    organizationId: httpRequest.body.data.organizationId
   });
 
   protected async executeImpl(req: Request, res: Response): Promise<Response> {

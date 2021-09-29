@@ -16,7 +16,7 @@ export default class CreateOrganizationController extends BaseController {
   }
 
   #buildRequestDto = (httpRequest: Request): CreateOrganizationRequestDto => ({
-    name: httpRequest.body.name,
+    name: httpRequest.body.data.name,
   });
 
   protected async executeImpl(req: Request, res: Response): Promise<Response> {

@@ -34,7 +34,7 @@ export class CreateOrganization
         });
       if (readOrganizationResult.length)
         throw new Error(
-          `${organization.value.name} already exists under the id ${organization.value.name}`
+          `${organization.value.name} already exists under the id ${readOrganizationResult[0].id}`
         );
 
       // TODO Install error handling
