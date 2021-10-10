@@ -10,10 +10,19 @@ export interface CreateOrganizationRequestDto {
   name: string;
 }
 
+export interface CreateOrganizationAuthDto {
+  isAdmin: boolean;
+}
+
 export type CreateOrganizationResponseDto = Result<OrganizationDto | null>;
 
 export class CreateOrganization
-  implements IUseCase<CreateOrganizationRequestDto, CreateOrganizationResponseDto>
+  implements
+    IUseCase<
+      CreateOrganizationRequestDto,
+      CreateOrganizationResponseDto,
+      CreateOrganizationAuthDto
+    >
 {
   #organizationRepository: IOrganizationRepository;
 
@@ -22,12 +31,16 @@ export class CreateOrganization
   }
 
   public async execute(
-    request: CreateOrganizationRequestDto
+    request: CreateOrganizationRequestDto,
+    auth: CreateOrganizationAuthDto
   ): Promise<CreateOrganizationResponseDto> {
-    const organization: Result<Organization | null> = this.#createOrganization(request);
+    const organization: Result<Organization | null> =
+      this.#createOrganization(request);
     if (!organization.value) return organization;
 
     try {
+      if (!auth.isAdmin) throw new Error('Not authorized to perform action');
+
       const readOrganizationResult: OrganizationDto[] =
         await this.#organizationRepository.findBy({
           name: organization.value.name,
@@ -40,9 +53,13 @@ export class CreateOrganization
       // TODO Install error handling
       await this.#organizationRepository.insertOne(organization.value);
 
-      return Result.ok<OrganizationDto>(buildOrganizationDto(organization.value));
+      return Result.ok<OrganizationDto>(
+        buildOrganizationDto(organization.value)
+      );
     } catch (error: any) {
-      return Result.fail<OrganizationDto>(typeof error === 'string' ? error : error.message);
+      return Result.fail<OrganizationDto>(
+        typeof error === 'string' ? error : error.message
+      );
     }
   }
 

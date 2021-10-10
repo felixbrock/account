@@ -13,10 +13,19 @@ export interface CreateAccountRequestDto {
   organizationId: string;
 }
 
+export interface CreateAccountAuthDto {
+  isAdmin: boolean;
+}
+
 export type CreateAccountResponseDto = Result<AccountDto | null>;
 
 export class CreateAccount
-  implements IUseCase<CreateAccountRequestDto, CreateAccountResponseDto>
+  implements
+    IUseCase<
+      CreateAccountRequestDto,
+      CreateAccountResponseDto,
+      CreateAccountAuthDto
+    >
 {
   #accountRepository: IAccountRepository;
 
@@ -31,12 +40,15 @@ export class CreateAccount
   }
 
   public async execute(
-    request: CreateAccountRequestDto
+    request: CreateAccountRequestDto,
+    auth: CreateAccountAuthDto
   ): Promise<CreateAccountResponseDto> {
     const createResult: Result<Account | null> = this.#createAccount(request);
     if (!createResult.value) return createResult;
 
     try {
+      if (!auth.isAdmin) throw new Error('Not authorized to perform action');
+
       const validatedRequest = await this.#validateRequest(createResult.value);
       if (validatedRequest.error) throw new Error(validatedRequest.error);
 

@@ -1,22 +1,36 @@
 // TODO: Violation of control flow. DI for express instead
 import { Request, Response } from 'express';
+import { ReadAccounts } from '../../../domain/account/read-accounts';
 import {
   ReadOrganizations,
+  ReadOrganizationsAuthDto,
   ReadOrganizationsRequestDto,
   ReadOrganizationsResponseDto,
 } from '../../../domain/organization/read-organizations';
 import Result from '../../../domain/value-types/transient-types/result';
-import { BaseController, CodeHttp } from '../../shared/base-controller';
+import {
+  BaseController,
+  CodeHttp,
+  UserAccountInfo,
+} from '../../shared/base-controller';
 
 export default class ReadOrganizationsController extends BaseController {
   #readOrganizations: ReadOrganizations;
 
-  public constructor(readOrganizations: ReadOrganizations) {
+  #readAccounts: ReadAccounts;
+
+  public constructor(
+    readOrganizations: ReadOrganizations,
+    readAccounts: ReadAccounts
+  ) {
     super();
     this.#readOrganizations = readOrganizations;
+    this.#readAccounts = readAccounts;
   }
 
-  #buildRequestDto = (httpRequest: Request): Result<ReadOrganizationsRequestDto> => {
+  #buildRequestDto = (
+    httpRequest: Request
+  ): Result<ReadOrganizationsRequestDto> => {
     const { name, modifiedOnStart, modifiedOnEnd, timezoneOffset } =
       httpRequest.query;
 
@@ -82,27 +96,63 @@ export default class ReadOrganizationsController extends BaseController {
     return !validationResults.includes(false);
   };
 
+  #buildAuthDto = (
+    userAccountInfo: UserAccountInfo
+  ): ReadOrganizationsAuthDto => ({
+    isAdmin: userAccountInfo.isAdmin,
+  });
+
   protected async executeImpl(req: Request, res: Response): Promise<Response> {
     try {
+      const token = req.headers.authorization;
+
+      if (!token)
+        return ReadOrganizationsController.unauthorized(res, 'Unauthorized');
+
+      const getUserAccountInfoResult: Result<UserAccountInfo> =
+        await ReadOrganizationsController.getUserAccountInfo(
+          token,
+          this.#readAccounts
+        );
+
+      if (!getUserAccountInfoResult.success)
+        return ReadOrganizationsController.unauthorized(
+          res,
+          getUserAccountInfoResult.error
+        );
+      if (!getUserAccountInfoResult.value)
+        throw new Error('Authorization failed');
+
       const buildDtoResult: Result<ReadOrganizationsRequestDto> =
         this.#buildRequestDto(req);
 
       if (buildDtoResult.error)
-        return ReadOrganizationsController.badRequest(res, buildDtoResult.error);
+        return ReadOrganizationsController.badRequest(
+          res,
+          buildDtoResult.error
+        );
       if (!buildDtoResult.value)
         return ReadOrganizationsController.badRequest(
           res,
           'Invalid request query paramerters'
         );
 
+      const authDto: ReadOrganizationsAuthDto = this.#buildAuthDto(
+        getUserAccountInfoResult.value
+      );
+
       const useCaseResult: ReadOrganizationsResponseDto =
-        await this.#readOrganizations.execute(buildDtoResult.value);
+        await this.#readOrganizations.execute(buildDtoResult.value, authDto);
 
       if (useCaseResult.error) {
         return ReadOrganizationsController.badRequest(res, useCaseResult.error);
       }
 
-      return ReadOrganizationsController.ok(res, useCaseResult.value, CodeHttp.OK);
+      return ReadOrganizationsController.ok(
+        res,
+        useCaseResult.value,
+        CodeHttp.OK
+      );
     } catch (error: any) {
       return ReadOrganizationsController.fail(res, error);
     }

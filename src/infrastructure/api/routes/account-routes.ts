@@ -9,11 +9,11 @@ const accountRoutes = Router();
 const accountDomain: AccountDomain = app.accountMain;
 
 const createAccountController = new CreateAccountController(
-  accountDomain.createAccount
+  accountDomain.createAccount, accountDomain.readAccounts
 );
 
 const readAccountController = new ReadAccountController(
-  accountDomain.readAccount
+  accountDomain.readAccount, accountDomain.readAccounts
 );
 
 accountRoutes.post('/', (req, res) =>
