@@ -52,7 +52,7 @@ export abstract class BaseController {
 
     try {
       const getAccountsResult: ReadAccountsResponseDto =
-        await readAccounts.execute({}, { userId: authPayload.username });      
+        await readAccounts.execute({}, { userId: authPayload.username });
 
       if (!getAccountsResult.value)
         throw new Error(`No account found for ${authPayload.username}`);
@@ -63,7 +63,9 @@ export abstract class BaseController {
         userId: authPayload.username,
         accountId: getAccountsResult.value[0].id,
         organizationId: getAccountsResult.value[0].organizationId,
-        isAdmin: authPayload['cognito:groups'].includes('admin'),
+        isAdmin: authPayload['cognito:groups']
+          ? authPayload['cognito:groups'].includes('admin')
+          : false,
       });
     } catch (error: any) {
       return Result.fail(error);
