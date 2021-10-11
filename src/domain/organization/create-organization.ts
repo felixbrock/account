@@ -5,6 +5,10 @@ import { Organization, OrganizationProperties } from '../entities/organization';
 import { buildOrganizationDto, OrganizationDto } from './organization-dto';
 import { IOrganizationRepository } from './i-organization-repository';
 import Result from '../value-types/transient-types/result';
+import {
+  ReadOrganizations,
+  ReadOrganizationsResponseDto,
+} from './read-organizations';
 
 export interface CreateOrganizationRequestDto {
   name: string;
@@ -26,8 +30,14 @@ export class CreateOrganization
 {
   #organizationRepository: IOrganizationRepository;
 
-  public constructor(organizationRepository: IOrganizationRepository) {
+  #readOrganizations: ReadOrganizations;
+
+  public constructor(
+    organizationRepository: IOrganizationRepository,
+    readOrganizations: ReadOrganizations
+  ) {
     this.#organizationRepository = organizationRepository;
+    this.#readOrganizations = readOrganizations;
   }
 
   public async execute(
@@ -41,13 +51,19 @@ export class CreateOrganization
     try {
       if (!auth.isAdmin) throw new Error('Not authorized to perform action');
 
-      const readOrganizationResult: OrganizationDto[] =
-        await this.#organizationRepository.findBy({
-          name: organization.value.name,
-        });
-      if (readOrganizationResult.length)
+      const readOrganizationsResult: ReadOrganizationsResponseDto =
+        await this.#readOrganizations.execute(
+          { name: organization.value.name },
+          { isAdmin: auth.isAdmin }
+        );
+
+      if (!readOrganizationsResult.success)
+        throw new Error(readOrganizationsResult.error);
+      if (!readOrganizationsResult.value)
+        throw new Error('Reading organizations failed');
+      if (readOrganizationsResult.value.length)
         throw new Error(
-          `${organization.value.name} already exists under the id ${readOrganizationResult[0].id}`
+          `Organization ${readOrganizationsResult.value[0].name} already exists under the id ${readOrganizationsResult.value[0].id}`
         );
 
       // TODO Install error handling

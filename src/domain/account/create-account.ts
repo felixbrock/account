@@ -7,6 +7,7 @@ import { IAccountRepository } from './i-account-repository';
 import Result from '../value-types/transient-types/result';
 import { IOrganizationRepository } from '../organization/i-organization-repository';
 import { Organization } from '../entities/organization';
+import { ReadAccounts, ReadAccountsResponseDto } from './read-accounts';
 
 export interface CreateAccountRequestDto {
   userId: string;
@@ -31,12 +32,16 @@ export class CreateAccount
 
   #organizationRepository: IOrganizationRepository;
 
+  #readAccounts: ReadAccounts;
+
   public constructor(
     accountRepository: IAccountRepository,
-    organizationRepository: IOrganizationRepository
+    organizationRepository: IOrganizationRepository,
+    readAccounts: ReadAccounts
   ) {
     this.#accountRepository = accountRepository;
     this.#organizationRepository = organizationRepository;
+    this.#readAccounts = readAccounts;
   }
 
   public async execute(
@@ -63,13 +68,14 @@ export class CreateAccount
   }
 
   #validateRequest = async (account: Account): Promise<Result<undefined>> => {
-    const readAccountResult: AccountDto[] =
-      await this.#accountRepository.findBy({
-        userId: account.userId,
-      });
-    if (readAccountResult.length)
-      return Result.fail(
-        `User ${account.userId} has already an account with the id ${readAccountResult[0].id}`
+    const readAccountsResult: ReadAccountsResponseDto =
+      await this.#readAccounts.execute({}, { userId: account.userId });
+
+    if (!readAccountsResult.success) throw new Error(readAccountsResult.error);
+    if (!readAccountsResult.value) throw new Error('Reading accounts failed');
+    if (readAccountsResult.value.length)
+      throw new Error(
+        `User ${readAccountsResult.value[0].userId} has already an account with the id ${readAccountsResult.value[0].id}`
       );
 
     const readOrganizationResult: Organization | null =
