@@ -104,14 +104,16 @@ export default class ReadOrganizationsController extends BaseController {
 
   protected async executeImpl(req: Request, res: Response): Promise<Response> {
     try {
-      const token = req.headers.authorization;
+      const authHeader = req.headers.authorization;
 
-      if (!token)
+      if (!authHeader)
         return ReadOrganizationsController.unauthorized(res, 'Unauthorized');
+
+      const jwt = authHeader.split(' ')[1];
 
       const getUserAccountInfoResult: Result<UserAccountInfo> =
         await ReadOrganizationsController.getUserAccountInfo(
-          token,
+          jwt,
           this.#readAccounts
         );
 
