@@ -52,12 +52,7 @@ export abstract class BaseController {
 
     try {
       const getAccountsResult: ReadAccountsResponseDto =
-        await readAccounts.execute({}, { userId: authPayload.username });
-
-      console.log(getAccountsResult.success);
-      console.log(getAccountsResult.error);
-      
-      
+        await readAccounts.execute({}, { userId: authPayload.username });      
 
       if (!getAccountsResult.value)
         throw new Error(`No account found for ${authPayload.username}`);
