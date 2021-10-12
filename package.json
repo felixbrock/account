@@ -10,7 +10,7 @@
     "clean": "rimraf dist",
     "build": "npm run clean && npm run tsc",
     "start": "npm run build && nodemon ./src/index.ts",
-    "deploy": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./deploy.ps1"
+    "deploy": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./deploy.ps1 -serviceName account"
   },
   "repository": {
     "type": "git",

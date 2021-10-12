@@ -1,21 +1,39 @@
-aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 085009017826.dkr.ecr.eu-central-1.amazonaws.com;
+param([string]$serviceName, [string]$env, [string]$version, [string]$previousVersion)
 
-$serviceName = 'account'
-$env='test'
-$version = 'v1.0.7'
-$previousVersion = 'v1.0.6'
+if (-Not $serviceName) {
+  $serviceName = read-host -Prompt "Please enter service name"
+}
+if (-Not $env) {
+  $env = read-host -Prompt "Please enter environment name"
+}
+
+$productionEnv = 'production';
+$testEnv = 'test';
+
+if(-Not ($env -eq $productionEnv -or $env -eq $testEnv)) {return write-host 'environment not recognized'}
+if($env -eq $productionEnv) {
+  if(-Not $version) {
+    $version = read-host -Prompt "Please enter version to publish"
+  }
+  if(-Not $previousVersion) {
+    $previousVersion = read-host -Prompt "Please enter previous version to delete"
+  }
+} 
+
+
+aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 085009017826.dkr.ecr.eu-central-1.amazonaws.com;
 
 $name = "085009017826.dkr.ecr.eu-central-1.amazonaws.com/${serviceName}"
 npm run build
-$tag = $(if ($env -eq 'production') {${version}} else {'latest'})
+$tag = $(if ($env -eq $productionEnv) {${version}} else {'latest'})
 docker build --build-arg "ENV=${env}" -t "${name}:${tag}" .
 docker push "${name}:${tag}"
 
-if ($env -eq 'production') {
+if ($env -eq $productionEnv) {
   docker rmi "${name}:${previousVersion}"
   aws ecr batch-delete-image --repository-name $serviceName --image-ids "imageTag=${previousVersion}"
 }
-elseif ($env -eq 'test') {
+elseif ($env -eq $testEnv) {
   docker image prune -f
   $imagesToDelete = aws ecr list-images --repository-name $serviceName --filter "tagStatus=UNTAGGED" --query 'imageIds[*]' --output json
   $imagesToDelete = $imagesToDelete.replace('"', '""')
@@ -23,5 +41,3 @@ elseif ($env -eq 'test') {
 
   aws ecs update-service --cluster hivedive-test --service "${serviceName}-service" --force-new-deployment
 }
-
-# docker run -dp 3000:3000 085009017826.dkr.ecr.eu-central-1.amazonaws.com/selector:v1.0.0
