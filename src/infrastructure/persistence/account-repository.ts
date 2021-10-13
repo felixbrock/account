@@ -17,7 +17,6 @@ interface AccountPersistence {
 const collectionName = 'accounts';
 
 export default class AccountRepositoryImpl implements IAccountRepository {
-  
   public findOne = async (id: string): Promise<Account | null> => {
     const client = createClient();
     const db = await connect(client);
@@ -57,8 +56,9 @@ export default class AccountRepositoryImpl implements IAccountRepository {
     const filter: { [key: string]: any } = {};
 
     if (accountQueryDto.userId) filter.userId = accountQueryDto.userId;
-    
-    if (accountQueryDto.organizationId) filter.organizationId = accountQueryDto.organizationId;
+
+    if (accountQueryDto.organizationId)
+      filter.organizationId = accountQueryDto.organizationId;
 
     const modifiedOnFilter: { [key: string]: number } = {};
     if (accountQueryDto.modifiedOnStart)
@@ -89,20 +89,23 @@ export default class AccountRepositoryImpl implements IAccountRepository {
   public insertOne = async (account: Account): Promise<Result<null>> => {
     try {
       const client = createClient();
-    const db = await connect(client);
+      const db = await connect(client);
       const result: InsertOneResult<Document> = await db
         .collection(collectionName)
         .insertOne(this.#toPersistence(account));
-      
-      if(!result.acknowledged) throw new Error('Account creation failed. Insert not acknowledged');
-  
+
+      if (!result.acknowledged)
+        throw new Error('Account creation failed. Insert not acknowledged');
+
       close(client);
-      
+
       return Result.ok<null>();
     } catch (error: any) {
-      return Result.fail<null>(typeof error === 'string' ? error : error.message);
+      return Result.fail<null>(
+        typeof error === 'string' ? error : error.message
+      );
     }
-  }
+  };
 
   #toEntity = (accountProperties: AccountProperties): Account => {
     const createAccountResult: Result<Account> =

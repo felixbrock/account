@@ -16,8 +16,8 @@ const getMongodbConfig = (): any => {
       mongodb.dbName = process.env.DATABASE_TEST_NAME || '';
       break;
     case 'production':
-      mongodb.url = process.env.DATABASE_TEST_URL || '';
-      mongodb.dbName = process.env.DATABASE_TEST_NAME || '';
+      mongodb.url = process.env.DATABASE_URL || '';
+      mongodb.dbName = process.env.DATABASE_NAME || '';
       break;
     default:
       break;

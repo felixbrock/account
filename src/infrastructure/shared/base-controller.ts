@@ -51,18 +51,18 @@ export abstract class BaseController {
     if (!authPayload) return Result.fail('Unauthorized - No auth payload');
 
     try {
-      const getAccountsResult: ReadAccountsResponseDto =
+      const readAccountsResult: ReadAccountsResponseDto =
         await readAccounts.execute({}, { userId: authPayload.username });
 
-      if (!getAccountsResult.value)
+      if (!readAccountsResult.value)
         throw new Error(`No account found for ${authPayload.username}`);
-      if (!getAccountsResult.value.length)
+      if (!readAccountsResult.value.length)
         throw new Error(`No account found for ${authPayload.username}`);
 
       return Result.ok({
         userId: authPayload.username,
-        accountId: getAccountsResult.value[0].id,
-        organizationId: getAccountsResult.value[0].organizationId,
+        accountId: readAccountsResult.value[0].id,
+        organizationId: readAccountsResult.value[0].organizationId,
         isAdmin: authPayload['cognito:groups']
           ? authPayload['cognito:groups'].includes('admin')
           : false,
