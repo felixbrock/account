@@ -1,4 +1,5 @@
 import { Document, FindCursor, InsertOneResult, ObjectId } from 'mongodb';
+import sanitize from 'mongo-sanitize';
 import { Account, AccountProperties } from '../../domain/entities/account';
 import {
   AccountQueryDto,
@@ -22,7 +23,7 @@ export default class AccountRepositoryImpl implements IAccountRepository {
     const db = await connect(client);
     const result: any = await db
       .collection(collectionName)
-      .findOne({ _id: new ObjectId(id) });
+      .findOne({ _id: new ObjectId(sanitize(id)) });
 
     close(client);
 
@@ -40,7 +41,7 @@ export default class AccountRepositoryImpl implements IAccountRepository {
     const db = await connect(client);
     const result: FindCursor = await db
       .collection(collectionName)
-      .find(this.#buildFilter(accountQueryDto));
+      .find(this.#buildFilter(sanitize(accountQueryDto)));
     const results = await result.toArray();
 
     close(client);
@@ -92,7 +93,7 @@ export default class AccountRepositoryImpl implements IAccountRepository {
       const db = await connect(client);
       const result: InsertOneResult<Document> = await db
         .collection(collectionName)
-        .insertOne(this.#toPersistence(account));
+        .insertOne(this.#toPersistence(sanitize(account)));
 
       if (!result.acknowledged)
         throw new Error('Account creation failed. Insert not acknowledged');

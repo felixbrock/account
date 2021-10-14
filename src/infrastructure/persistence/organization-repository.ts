@@ -1,5 +1,9 @@
 import { Document, FindCursor, InsertOneResult, ObjectId } from 'mongodb';
-import { Organization, OrganizationProperties } from '../../domain/entities/organization';
+import sanitize from 'mongo-sanitize';
+import {
+  Organization,
+  OrganizationProperties,
+} from '../../domain/entities/organization';
 import {
   OrganizationQueryDto,
   IOrganizationRepository,
@@ -15,14 +19,15 @@ interface OrganizationPersistence {
 
 const collectionName = 'organizations';
 
-export default class OrganizationRepositoryImpl implements IOrganizationRepository {
-  
+export default class OrganizationRepositoryImpl
+  implements IOrganizationRepository
+{
   public findOne = async (id: string): Promise<Organization | null> => {
     const client = createClient();
     const db = await connect(client);
     const result: any = await db
       .collection(collectionName)
-      .findOne({ _id: new ObjectId(id) });
+      .findOne({ _id: new ObjectId(sanitize(id)) });
 
     close(client);
 
@@ -40,7 +45,7 @@ export default class OrganizationRepositoryImpl implements IOrganizationReposito
     const db = await connect(client);
     const result: FindCursor = await db
       .collection(collectionName)
-      .find(this.#buildFilter(organizationQueryDto));
+      .find(this.#buildFilter(sanitize(organizationQueryDto)));
     const results = await result.toArray();
 
     close(client);
@@ -83,35 +88,49 @@ export default class OrganizationRepositoryImpl implements IOrganizationReposito
     );
   };
 
-  public insertOne = async (organization: Organization): Promise<Result<null>> => {
+  public insertOne = async (
+    organization: Organization
+  ): Promise<Result<null>> => {
     try {
       const client = createClient();
-    const db = await connect(client);
+      const db = await connect(client);
       const result: InsertOneResult<Document> = await db
         .collection(collectionName)
-        .insertOne(this.#toPersistence(organization));
-      
-      if(!result.acknowledged) throw new Error('Organization creation failed. Insert not acknowledged');
-  
+        .insertOne(this.#toPersistence(sanitize(organization)));
+
+      if (!result.acknowledged)
+        throw new Error(
+          'Organization creation failed. Insert not acknowledged'
+        );
+
       close(client);
-      
+
       return Result.ok<null>();
     } catch (error: any) {
-      return Result.fail<null>(typeof error === 'string' ? error : error.message);
+      return Result.fail<null>(
+        typeof error === 'string' ? error : error.message
+      );
     }
-  }
+  };
 
-  #toEntity = (organizationProperties: OrganizationProperties): Organization => {
-    const createOrganizationResult: Result<Organization> =
-      Organization.create(organizationProperties);
+  #toEntity = (
+    organizationProperties: OrganizationProperties
+  ): Organization => {
+    const createOrganizationResult: Result<Organization> = Organization.create(
+      organizationProperties
+    );
 
-    if (createOrganizationResult.error) throw new Error(createOrganizationResult.error);
-    if (!createOrganizationResult.value) throw new Error('Organization creation failed');
+    if (createOrganizationResult.error)
+      throw new Error(createOrganizationResult.error);
+    if (!createOrganizationResult.value)
+      throw new Error('Organization creation failed');
 
     return createOrganizationResult.value;
   };
 
-  #buildProperties = (organization: OrganizationPersistence): OrganizationProperties => ({
+  #buildProperties = (
+    organization: OrganizationPersistence
+  ): OrganizationProperties => ({
     // eslint-disable-next-line no-underscore-dangle
     id: organization._id,
     name: organization.name,

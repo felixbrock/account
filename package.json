@@ -28,6 +28,7 @@
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.12",
     "@types/jsonwebtoken": "^8.5.5",
+    "@types/mongo-sanitize": "^1.0.1",
     "@typescript-eslint/eslint-plugin": "^4.29.3",
     "@typescript-eslint/parser": "^4.29.3",
     "eslint": "^7.2.0",
@@ -47,6 +48,7 @@
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
+    "mongo-sanitize": "^1.1.0",
     "mongodb": "^4.1.0"
   }
 }
