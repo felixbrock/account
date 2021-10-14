@@ -1,5 +1,4 @@
 import { Organization } from '../entities/organization';
-import Result from '../value-types/transient-types/result';
 
 export interface OrganizationQueryDto {
   name?: string;
@@ -13,5 +12,5 @@ export interface IOrganizationRepository {
     organizationQueryDto: OrganizationQueryDto
   ): Promise<Organization[]>;
   all(): Promise<Organization[]>;
-  insertOne(organization: Organization): Promise<Result<null>>;
+  insertOne(organization: Organization): Promise<string>;
 }

@@ -1,29 +1,38 @@
 export const nodeEnv = process.env.NODE_ENV || 'development';
 export const defaultPort = 8081;
-export const port = process.env.PORT ? parseInt(process.env.PORT, 10) : defaultPort;
-export const apiRoot = process.env.API_ROOT || "api";
+export const port = process.env.PORT
+  ? parseInt(process.env.PORT, 10)
+  : defaultPort;
+export const apiRoot = process.env.API_ROOT || 'api';
 
-const getMongodbConfig = (): any => {
-  const mongodb: any = {};
+export interface MongoDbConfig {
+  url: string;
+  dbName: string;
+}
 
+const getMongodbConfig = (): MongoDbConfig => {
   switch (nodeEnv) {
     case 'development':
-      mongodb.url = process.env.DATABASE_DEV_URL || '';
-      mongodb.dbName = process.env.DATABASE_DEV_NAME || '';
-      break;
+      return {
+        url: process.env.DATABASE_DEV_URL || '',
+        dbName: process.env.DATABASE_DEV_NAME || '',
+      };
     case 'test':
-      mongodb.url = process.env.DATABASE_TEST_URL || '';
-      mongodb.dbName = process.env.DATABASE_TEST_NAME || '';
-      break;
+      return {
+        url: process.env.DATABASE_TEST_URL || '',
+        dbName: process.env.DATABASE_TEST_NAME || '',
+      };
     case 'production':
-      mongodb.url = process.env.DATABASE_URL || '';
-      mongodb.dbName = process.env.DATABASE_NAME || '';
-      break;
+      return {
+        url: process.env.DATABASE_URL || '',
+        dbName: process.env.DATABASE_NAME || '',
+      };
     default:
-      break;
+      return {
+        url: '',
+        dbName: '',
+      };
   }
-
-  return mongodb;
 };
 
 export const appConfig = {

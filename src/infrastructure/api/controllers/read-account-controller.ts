@@ -44,10 +44,7 @@ export default class ReadAccountController extends BaseController {
       const jwt = authHeader.split(' ')[1];
 
       const getUserAccountInfoResult: Result<UserAccountInfo> =
-        await ReadAccountController.getUserAccountInfo(
-          jwt,
-          this.#readAccounts
-        );
+        await ReadAccountController.getUserAccountInfo(jwt, this.#readAccounts);
 
       if (!getUserAccountInfoResult.success)
         return ReadAccountController.unauthorized(
@@ -71,8 +68,11 @@ export default class ReadAccountController extends BaseController {
       }
 
       return ReadAccountController.ok(res, useCaseResult.value, CodeHttp.OK);
-    } catch (error: any) {
-      return ReadAccountController.fail(res, error);
+    } catch (error: unknown) {
+      if (typeof error === 'string')
+        return ReadAccountController.fail(res, error);
+      if (error instanceof Error) return ReadAccountController.fail(res, error);
+      return ReadAccountController.fail(res, 'Unknown error occured');
     }
   }
 }

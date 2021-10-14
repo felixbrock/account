@@ -1,5 +1,4 @@
 import { Account } from '../entities/account';
-import Result from '../value-types/transient-types/result';
 
 export interface AccountQueryDto {
   userId?: string;
@@ -14,5 +13,5 @@ export interface IAccountRepository {
     accountQueryDto: AccountQueryDto
   ): Promise<Account[]>;
   all(): Promise<Account[]>;
-  insertOne(account: Account): Promise<Result<null>>;
+  insertOne(account: Account): Promise<string>;
 }

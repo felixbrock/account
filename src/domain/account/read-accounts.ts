@@ -13,7 +13,7 @@ export interface ReadAccountsAuthDto {
   userId: string;
 }
 
-export type ReadAccountsResponseDto = Result<AccountDto[] | null>;
+export type ReadAccountsResponseDto = Result<AccountDto[]>;
 
 export class ReadAccounts
   implements
@@ -34,18 +34,18 @@ export class ReadAccounts
     auth: ReadAccountsAuthDto
   ): Promise<ReadAccountsResponseDto> {
     try {
-      const accounts: Account[] | null = await this.#accountRepository.findBy(
+      const accounts: Account[] = await this.#accountRepository.findBy(
         this.#buildAccountQueryDto(request, auth)
       );
       if (!accounts) throw new Error(`Queried accounts do not exist`);
 
-      return Result.ok<AccountDto[]>(
+      return Result.ok(
         accounts.map((account) => buildAccountDto(account))
       );
-    } catch (error: any) {
-      return Result.fail<null>(
-        typeof error === 'string' ? error : error.message
-      );
+    } catch (error: unknown) {
+      if(typeof error === 'string') return Result.fail(error);
+      if(error instanceof Error) return Result.fail(error.message);
+      return Result.fail('Unknown error occured');
     }
   }
 

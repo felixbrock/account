@@ -82,8 +82,10 @@ export default class CreateOrganizationController extends BaseController {
         useCaseResult.value,
         CodeHttp.CREATED
       );
-    } catch (error: any) {
-      return CreateOrganizationController.fail(res, error);
+    } catch (error: unknown) {
+      if(typeof error === 'string') return CreateOrganizationController.fail(res, error);
+      if(error instanceof Error) return CreateOrganizationController.fail(res, error);
+      return CreateOrganizationController.fail(res,'Unknown error occured');
     }
   }
 }

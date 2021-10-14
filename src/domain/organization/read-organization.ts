@@ -13,7 +13,7 @@ export interface ReadOrganizationAuthDto {
   isAdmin: boolean;
 }
 
-export type ReadOrganizationResponseDto = Result<OrganizationDto | null>;
+export type ReadOrganizationResponseDto = Result<OrganizationDto>;
 
 export class ReadOrganization
   implements
@@ -44,11 +44,11 @@ export class ReadOrganization
           `Organization with id ${request.organizationId} does not exist`
         );
 
-      return Result.ok<OrganizationDto>(buildOrganizationDto(organization));
-    } catch (error: any) {
-      return Result.fail<null>(
-        typeof error === 'string' ? error : error.message
-      );
+      return Result.ok(buildOrganizationDto(organization));
+    } catch (error: unknown) {
+      if(typeof error === 'string') return Result.fail(error);
+      if(error instanceof Error) return Result.fail(error.message);
+      return Result.fail('Unknown error occured');
     }
   }
 }

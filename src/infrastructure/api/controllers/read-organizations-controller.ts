@@ -46,7 +46,7 @@ export default class ReadOrganizationsController extends BaseController {
       );
 
     try {
-      return Result.ok<ReadOrganizationsRequestDto>({
+      return Result.ok({
         name: typeof name === 'string' ? name : undefined,
         modifiedOnStart:
           typeof modifiedOnStart === 'string'
@@ -57,10 +57,10 @@ export default class ReadOrganizationsController extends BaseController {
             ? this.#buildDate(modifiedOnEnd)
             : undefined,
       });
-    } catch (error: any) {
-      return Result.fail<ReadOrganizationsRequestDto>(
-        typeof error === 'string' ? error : error.message
-      );
+    } catch (error: unknown) {
+      if(typeof error === 'string') return Result.fail(error);
+      if(error instanceof Error) return Result.fail(error.message);
+      return Result.fail('Unknown error occured');
     }
   };
 
@@ -155,8 +155,12 @@ export default class ReadOrganizationsController extends BaseController {
         useCaseResult.value,
         CodeHttp.OK
       );
-    } catch (error: any) {
-      return ReadOrganizationsController.fail(res, error);
+    } catch (error: unknown) {
+      if (typeof error === 'string')
+        return ReadOrganizationsController.fail(res, error);
+      if (error instanceof Error)
+        return ReadOrganizationsController.fail(res, error);
+      return ReadOrganizationsController.fail(res, 'Unknown error occured');
     }
   }
 }

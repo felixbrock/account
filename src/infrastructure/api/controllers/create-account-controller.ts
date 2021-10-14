@@ -74,8 +74,10 @@ export default class CreateAccountController extends BaseController {
         useCaseResult.value,
         CodeHttp.CREATED
       );
-    } catch (error: any) {
-      return CreateAccountController.fail(res, error);
+    } catch (error: unknown) {
+      if(typeof error === 'string') return CreateAccountController.fail(res, error);
+      if(error instanceof Error) return CreateAccountController.fail(res, error);
+      return CreateAccountController.fail(res,'Unknown error occured');
     }
   }
 }

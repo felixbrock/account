@@ -38,10 +38,10 @@ export class Organization {
   public static create(
     properties: OrganizationProperties
   ): Result<Organization> {
-    if (!properties.id) return Result.fail<Organization>('Organization must have id');
-    if (!properties.name) return Result.fail<Organization>('Organization must have name');
+    if (!properties.id) return Result.fail('Organization must have id');
+    if (!properties.name) return Result.fail('Organization must have name');
 
     const organization = new Organization(properties);
-    return Result.ok<Organization>(organization);
+    return Result.ok(organization);
   }
 }

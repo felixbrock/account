@@ -18,7 +18,7 @@ export interface CreateAccountAuthDto {
   isAdmin: boolean;
 }
 
-export type CreateAccountResponseDto = Result<AccountDto | null>;
+export type CreateAccountResponseDto = Result<AccountDto>;
 
 export class CreateAccount
   implements
@@ -48,7 +48,7 @@ export class CreateAccount
     request: CreateAccountRequestDto,
     auth: CreateAccountAuthDto
   ): Promise<CreateAccountResponseDto> {
-    const createResult: Result<Account | null> = this.#createAccount(request);
+    const createResult: Result<Account> = this.#createAccount(request);
     if (!createResult.value) return createResult;
 
     try {
@@ -59,11 +59,11 @@ export class CreateAccount
 
       await this.#accountRepository.insertOne(createResult.value);
 
-      return Result.ok<AccountDto>(buildAccountDto(createResult.value));
-    } catch (error: any) {
-      return Result.fail<AccountDto>(
-        typeof error === 'string' ? error : error.message
-      );
+      return Result.ok(buildAccountDto(createResult.value));
+    } catch (error: unknown) {
+      if(typeof error === 'string') return Result.fail(error);
+      if(error instanceof Error) return Result.fail(error.message);
+      return Result.fail('Unknown error occured');
     }
   }
 
@@ -86,12 +86,12 @@ export class CreateAccount
         `No organization exists under id ${account.organizationId}`
       );
 
-    return Result.ok<undefined>(undefined);
+    return Result.ok(undefined);
   };
 
   #createAccount = (
     request: CreateAccountRequestDto
-  ): Result<Account | null> => {
+  ): Result<Account> => {
     const accountProperties: AccountProperties = {
       id: new ObjectId().toHexString(),
       userId: request.userId,

@@ -79,8 +79,12 @@ export default class ReadOrganizationController extends BaseController {
         useCaseResult.value,
         CodeHttp.OK
       );
-    } catch (error: any) {
-      return ReadOrganizationController.fail(res, error);
+    } catch (error: unknown) {
+      if (typeof error === 'string')
+        return ReadOrganizationController.fail(res, error);
+      if (error instanceof Error)
+        return ReadOrganizationController.fail(res, error);
+      return ReadOrganizationController.fail(res, 'Unknown error occured');
     }
   }
 }

@@ -17,6 +17,11 @@ interface OrganizationPersistence {
   modifiedOn: number;
 }
 
+interface OrganizationQueryFilter {
+  name?: string;
+  modifiedOn?: { [key: string]: number };
+}
+
 const collectionName = 'organizations';
 
 export default class OrganizationRepositoryImpl
@@ -24,16 +29,22 @@ export default class OrganizationRepositoryImpl
 {
   public findOne = async (id: string): Promise<Organization | null> => {
     const client = createClient();
-    const db = await connect(client);
-    const result: any = await db
-      .collection(collectionName)
-      .findOne({ _id: new ObjectId(sanitize(id)) });
+    try {
+      const db = await connect(client);
+      const result: any = await db
+        .collection(collectionName)
+        .findOne({ _id: new ObjectId(sanitize(id)) });
 
-    close(client);
+      close(client);
 
-    if (!result) return null;
+      if (!result) return null;
 
-    return this.#toEntity(this.#buildProperties(result));
+      return this.#toEntity(this.#buildProperties(result));
+    } catch (error: unknown) {
+      if (typeof error === 'string') return Promise.reject(error);
+      if (error instanceof Error) return Promise.reject(error.message);
+      return Promise.reject(new Error('Unknown error occured'));
+    }
   };
 
   public findBy = async (
@@ -42,22 +53,28 @@ export default class OrganizationRepositoryImpl
     if (!Object.keys(organizationQueryDto).length) return this.all();
 
     const client = createClient();
-    const db = await connect(client);
-    const result: FindCursor = await db
-      .collection(collectionName)
-      .find(this.#buildFilter(sanitize(organizationQueryDto)));
-    const results = await result.toArray();
+    try {
+      const db = await connect(client);
+      const result: FindCursor = await db
+        .collection(collectionName)
+        .find(this.#buildFilter(sanitize(organizationQueryDto)));
+      const results = await result.toArray();
 
-    close(client);
+      close(client);
 
-    if (!results || !results.length) return [];
+      if (!results || !results.length) return [];
 
-    return results.map((element: any) =>
-      this.#toEntity(this.#buildProperties(element))
-    );
+      return results.map((element: any) =>
+        this.#toEntity(this.#buildProperties(element))
+      );
+    } catch (error: unknown) {
+      if (typeof error === 'string') return Promise.reject(error);
+      if (error instanceof Error) return Promise.reject(error.message);
+      return Promise.reject(new Error('Unknown error occured'));
+    }
   };
 
-  #buildFilter = (organizationQueryDto: OrganizationQueryDto): any => {
+  #buildFilter = (organizationQueryDto: OrganizationQueryDto): OrganizationQueryFilter => {
     const filter: { [key: string]: any } = {};
 
     if (organizationQueryDto.name) filter.name = organizationQueryDto.name;
@@ -75,24 +92,29 @@ export default class OrganizationRepositoryImpl
 
   public all = async (): Promise<Organization[]> => {
     const client = createClient();
-    const db = await connect(client);
-    const result: FindCursor = await db.collection(collectionName).find();
-    const results = await result.toArray();
+    try {
+      const db = await connect(client);
+      const result: FindCursor = await db.collection(collectionName).find();
+      const results = await result.toArray();
 
-    close(client);
+      close(client);
 
-    if (!results || !results.length) return [];
+      if (!results || !results.length) return [];
 
-    return results.map((element: any) =>
-      this.#toEntity(this.#buildProperties(element))
-    );
+      return results.map((element: any) =>
+        this.#toEntity(this.#buildProperties(element))
+      );
+    } catch (error: unknown) {
+      if (typeof error === 'string') return Promise.reject(error);
+      if (error instanceof Error) return Promise.reject(error.message);
+      return Promise.reject(new Error('Unknown error occured'));
+    }
   };
 
-  public insertOne = async (
-    organization: Organization
-  ): Promise<Result<null>> => {
+  public insertOne = async (organization: Organization): Promise<string> => {
+    const client = createClient();
+
     try {
-      const client = createClient();
       const db = await connect(client);
       const result: InsertOneResult<Document> = await db
         .collection(collectionName)
@@ -105,11 +127,11 @@ export default class OrganizationRepositoryImpl
 
       close(client);
 
-      return Result.ok<null>();
-    } catch (error: any) {
-      return Result.fail<null>(
-        typeof error === 'string' ? error : error.message
-      );
+      return result.insertedId.toHexString();
+    } catch (error: unknown) {
+      if (typeof error === 'string') return Promise.reject(error);
+      if (error instanceof Error) return Promise.reject(error.message);
+      return Promise.reject(new Error('Unknown error occured'));
     }
   };
 

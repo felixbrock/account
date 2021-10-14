@@ -15,21 +15,33 @@ interface AccountPersistence {
   modifiedOn: number;
 }
 
+interface AccountQueryFilter {
+  userId?: string;
+  organizationId?: string;
+  modifiedOn?: { [key: string]: number };
+}
+
 const collectionName = 'accounts';
 
 export default class AccountRepositoryImpl implements IAccountRepository {
   public findOne = async (id: string): Promise<Account | null> => {
     const client = createClient();
-    const db = await connect(client);
-    const result: any = await db
-      .collection(collectionName)
-      .findOne({ _id: new ObjectId(sanitize(id)) });
+    try {
+      const db = await connect(client);
+      const result: any = await db
+        .collection(collectionName)
+        .findOne({ _id: new ObjectId(sanitize(id)) });
 
-    close(client);
+      close(client);
 
-    if (!result) return null;
+      if (!result) return null;
 
-    return this.#toEntity(this.#buildProperties(result));
+      return this.#toEntity(this.#buildProperties(result));
+    } catch (error: unknown) {
+      if (typeof error === 'string') return Promise.reject(error);
+      if (error instanceof Error) return Promise.reject(error.message);
+      return Promise.reject(new Error('Unknown error occured'));
+    }
   };
 
   public findBy = async (
@@ -38,22 +50,28 @@ export default class AccountRepositoryImpl implements IAccountRepository {
     if (!Object.keys(accountQueryDto).length) return this.all();
 
     const client = createClient();
-    const db = await connect(client);
-    const result: FindCursor = await db
-      .collection(collectionName)
-      .find(this.#buildFilter(sanitize(accountQueryDto)));
-    const results = await result.toArray();
+    try {
+      const db = await connect(client);
+      const result: FindCursor = await db
+        .collection(collectionName)
+        .find(this.#buildFilter(sanitize(accountQueryDto)));
+      const results = await result.toArray();
 
-    close(client);
+      close(client);
 
-    if (!results || !results.length) return [];
+      if (!results || !results.length) return [];
 
-    return results.map((element: any) =>
-      this.#toEntity(this.#buildProperties(element))
-    );
+      return results.map((element: any) =>
+        this.#toEntity(this.#buildProperties(element))
+      );
+    } catch (error: unknown) {
+      if (typeof error === 'string') return Promise.reject(error);
+      if (error instanceof Error) return Promise.reject(error.message);
+      return Promise.reject(new Error('Unknown error occured'));
+    }
   };
 
-  #buildFilter = (accountQueryDto: AccountQueryDto): any => {
+  #buildFilter = (accountQueryDto: AccountQueryDto): AccountQueryFilter => {
     const filter: { [key: string]: any } = {};
 
     if (accountQueryDto.userId) filter.userId = accountQueryDto.userId;
@@ -74,22 +92,28 @@ export default class AccountRepositoryImpl implements IAccountRepository {
 
   public all = async (): Promise<Account[]> => {
     const client = createClient();
-    const db = await connect(client);
-    const result: FindCursor = await db.collection(collectionName).find();
-    const results = await result.toArray();
+    try {
+      const db = await connect(client);
+      const result: FindCursor = await db.collection(collectionName).find();
+      const results = await result.toArray();
 
-    close(client);
+      close(client);
 
-    if (!results || !results.length) return [];
+      if (!results || !results.length) return [];
 
-    return results.map((element: any) =>
-      this.#toEntity(this.#buildProperties(element))
-    );
+      return results.map((element: any) =>
+        this.#toEntity(this.#buildProperties(element))
+      );
+    } catch (error: unknown) {
+      if (typeof error === 'string') return Promise.reject(error);
+      if (error instanceof Error) return Promise.reject(error.message);
+      return Promise.reject(new Error('Unknown error occured'));
+    }
   };
 
-  public insertOne = async (account: Account): Promise<Result<null>> => {
+  public insertOne = async (account: Account): Promise<string> => {
+    const client = createClient();
     try {
-      const client = createClient();
       const db = await connect(client);
       const result: InsertOneResult<Document> = await db
         .collection(collectionName)
@@ -100,11 +124,11 @@ export default class AccountRepositoryImpl implements IAccountRepository {
 
       close(client);
 
-      return Result.ok<null>();
-    } catch (error: any) {
-      return Result.fail<null>(
-        typeof error === 'string' ? error : error.message
-      );
+      return result.insertedId.toHexString();
+    } catch (error: unknown) {
+      if (typeof error === 'string') return Promise.reject(error);
+      if (error instanceof Error) return Promise.reject(error.message);
+      return Promise.reject(new Error('Unknown error occured'));
     }
   };
 

@@ -13,7 +13,7 @@ export interface ReadAccountAuthDto {
   isAdmin: boolean;
 }
 
-export type ReadAccountResponseDto = Result<AccountDto | null>;
+export type ReadAccountResponseDto = Result<AccountDto>;
 
 export class ReadAccount
   implements
@@ -39,11 +39,11 @@ export class ReadAccount
       if (!account)
         throw new Error(`Account with id ${request.accountId} does not exist`);
 
-      return Result.ok<AccountDto>(buildAccountDto(account));
-    } catch (error: any) {
-      return Result.fail<null>(
-        typeof error === 'string' ? error : error.message
-      );
+      return Result.ok(buildAccountDto(account));
+    } catch (error: unknown) {
+      if(typeof error === 'string') return Result.fail(error);
+      if(error instanceof Error) return Result.fail(error.message);
+      return Result.fail('Unknown error occured');
     }
   }
 }

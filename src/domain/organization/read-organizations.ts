@@ -17,7 +17,7 @@ export interface ReadOrganizationsAuthDto {
   isAdmin: boolean;
 }
 
-export type ReadOrganizationsResponseDto = Result<OrganizationDto[] | null>;
+export type ReadOrganizationsResponseDto = Result<OrganizationDto[]>;
 
 export class ReadOrganizations
   implements
@@ -40,19 +40,19 @@ export class ReadOrganizations
     try {
       if (!auth.isAdmin) throw new Error('Not authorized to perform action');
 
-      const organizations: Organization[] | null =
+      const organizations: Organization[] =
         await this.#organizationRepository.findBy(
           this.#buildOrganizationQueryDto(request)
         );
       if (!organizations) throw new Error(`Queried organizations do not exist`);
 
-      return Result.ok<OrganizationDto[]>(
+      return Result.ok(
         organizations.map((organization) => buildOrganizationDto(organization))
       );
-    } catch (error: any) {
-      return Result.fail<null>(
-        typeof error === 'string' ? error : error.message
-      );
+    } catch (error: unknown) {
+      if(typeof error === 'string') return Result.fail(error);
+      if(error instanceof Error) return Result.fail(error.message);
+      return Result.fail('Unknown error occured');
     }
   }
 

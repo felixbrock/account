@@ -18,7 +18,7 @@ export interface CreateOrganizationAuthDto {
   isAdmin: boolean;
 }
 
-export type CreateOrganizationResponseDto = Result<OrganizationDto | null>;
+export type CreateOrganizationResponseDto = Result<OrganizationDto>;
 
 export class CreateOrganization
   implements
@@ -44,7 +44,7 @@ export class CreateOrganization
     request: CreateOrganizationRequestDto,
     auth: CreateOrganizationAuthDto
   ): Promise<CreateOrganizationResponseDto> {
-    const organization: Result<Organization | null> =
+    const organization: Result<Organization> =
       this.#createOrganization(request);
     if (!organization.value) return organization;
 
@@ -69,19 +69,19 @@ export class CreateOrganization
       // TODO Install error handling
       await this.#organizationRepository.insertOne(organization.value);
 
-      return Result.ok<OrganizationDto>(
+      return Result.ok(
         buildOrganizationDto(organization.value)
       );
-    } catch (error: any) {
-      return Result.fail<OrganizationDto>(
-        typeof error === 'string' ? error : error.message
-      );
+    } catch (error: unknown) {
+      if(typeof error === 'string') return Result.fail(error);
+      if(error instanceof Error) return Result.fail(error.message);
+      return Result.fail('Unknown error occured');
     }
   }
 
   #createOrganization = (
     request: CreateOrganizationRequestDto
-  ): Result<Organization | null> => {
+  ): Result<Organization> => {
     const organizationProperties: OrganizationProperties = {
       id: new ObjectId().toHexString(),
       name: request.name,

@@ -43,7 +43,7 @@ export default class ReadAccountsController extends BaseController {
       );
 
     try {
-      return Result.ok<ReadAccountsRequestDto>({
+      return Result.ok({
         modifiedOnStart:
           typeof modifiedOnStart === 'string'
             ? this.#buildDate(modifiedOnStart)
@@ -53,10 +53,12 @@ export default class ReadAccountsController extends BaseController {
             ? this.#buildDate(modifiedOnEnd)
             : undefined,
       });
-    } catch (error: any) {
-      return Result.fail<ReadAccountsRequestDto>(
-        typeof error === 'string' ? error : error.message
-      );
+    } catch (error: unknown) {
+      if (typeof error === 'string')
+        return Result.fail(error);
+      if (error instanceof Error)
+        return Result.fail(error.message);
+      return Result.fail('Unknown error occured');
     }
   };
 
@@ -103,7 +105,7 @@ export default class ReadAccountsController extends BaseController {
       if (!authHeader)
         return ReadAccountsController.unauthorized(res, 'Unauthorized');
 
-      const jwt = authHeader.split(' ')[1];     
+      const jwt = authHeader.split(' ')[1];
 
       const getUserAccountInfoResult: Result<UserAccountInfo> =
         await ReadAccountsController.getUserAccountInfo(
@@ -142,8 +144,12 @@ export default class ReadAccountsController extends BaseController {
       }
 
       return ReadAccountsController.ok(res, useCaseResult.value, CodeHttp.OK);
-    } catch (error: any) {
-      return ReadAccountsController.fail(res, error);
+    } catch (error: unknown) {
+      if (typeof error === 'string')
+        return ReadAccountsController.fail(res, error);
+      if (error instanceof Error)
+        return ReadAccountsController.fail(res, error);
+      return ReadAccountsController.fail(res, 'Unknown error occured');
     }
   }
 }

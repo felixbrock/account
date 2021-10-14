@@ -46,11 +46,11 @@ export class Account {
   public static create(
     properties: AccountProperties
   ): Result<Account> {  
-    if (!properties.id) return Result.fail<Account>('Account must have id');
-    if (!properties.userId) return Result.fail<Account>('Account must have user-id');
-    if (!properties.organizationId) return Result.fail<Account>('Account must have organization-id');
+    if (!properties.id) return Result.fail('Account must have id');
+    if (!properties.userId) return Result.fail('Account must have user-id');
+    if (!properties.organizationId) return Result.fail('Account must have organization-id');
 
     const account = new Account(properties);
-    return Result.ok<Account>(account);
+    return Result.ok(account);
   }
 }
