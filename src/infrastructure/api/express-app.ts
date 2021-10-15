@@ -1,10 +1,5 @@
 import cors from 'cors';
 import express, { Application } from 'express';
-// TODO Check for good express middleware http://expressjs.com/en/resources/middleware/compression.html
-// import compression from "compression";
-// import cors from "cors";
-// import helmet from "helmet";
-// import morgan from "morgan";
 import v1Router from './routes/v1';
 
 interface AppConfig {

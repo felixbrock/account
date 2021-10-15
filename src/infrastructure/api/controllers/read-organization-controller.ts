@@ -70,7 +70,7 @@ export default class ReadOrganizationController extends BaseController {
       const useCaseResult: ReadOrganizationResponseDto =
         await this.#readOrganization.execute(requestDto, authDto);
 
-      if (useCaseResult.error) {
+      if (!useCaseResult.success) {
         return ReadOrganizationController.badRequest(res, useCaseResult.error);
       }
 

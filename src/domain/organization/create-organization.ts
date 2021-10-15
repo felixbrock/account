@@ -64,7 +64,6 @@ export class CreateOrganization
           `Organization ${readOrganizationsResult.value[0].name} already exists under the id ${readOrganizationsResult.value[0].id}`
         );
 
-      // TODO Install error handling
       const insertResult = await this.#organizationRepository.insertOne(
         organization
       );

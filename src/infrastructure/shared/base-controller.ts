@@ -69,9 +69,9 @@ export abstract class BaseController {
           : false,
       });
     } catch (error: unknown) {
-      if (typeof error === 'string') return Promise.reject(error);
-      if (error instanceof Error) return Promise.reject(error.message);
-      return Promise.reject(new Error('Unknown error occured'));
+      if (typeof error === 'string') return Result.fail(error);
+      if (error instanceof Error) return Result.fail(error.message);
+      return Result.fail('Unknown error occured');
     }
   }
 

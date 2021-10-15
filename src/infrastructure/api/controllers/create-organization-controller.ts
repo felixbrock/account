@@ -70,7 +70,7 @@ export default class CreateOrganizationController extends BaseController {
       const useCaseResult: CreateOrganizationResponseDto =
         await this.#createOrganization.execute(requestDto, authDto);
 
-      if (useCaseResult.error) {
+      if (!useCaseResult.success) {
         return CreateOrganizationController.badRequest(
           res,
           useCaseResult.error

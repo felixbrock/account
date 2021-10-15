@@ -63,7 +63,7 @@ export default class ReadAccountController extends BaseController {
       const useCaseResult: ReadAccountResponseDto =
         await this.#readAccount.execute(requestDto, authDto);
 
-      if (useCaseResult.error) {
+      if (!useCaseResult.success) {
         return ReadAccountController.badRequest(res, useCaseResult.error);
       }
 

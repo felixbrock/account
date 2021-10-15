@@ -65,7 +65,7 @@ export default class CreateAccountController extends BaseController {
       const useCaseResult: CreateAccountResponseDto =
         await this.#createAccount.execute(requestDto, authDto);
 
-      if (useCaseResult.error) {
+      if (!useCaseResult.success) {
         return CreateAccountController.badRequest(res, useCaseResult.error);
       }
 
