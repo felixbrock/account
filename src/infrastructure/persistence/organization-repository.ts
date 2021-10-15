@@ -50,10 +50,10 @@ export default class OrganizationRepositoryImpl
   public findBy = async (
     organizationQueryDto: OrganizationQueryDto
   ): Promise<Organization[]> => {
-    if (!Object.keys(organizationQueryDto).length) return this.all();
-
-    const client = createClient();
     try {
+      if (!Object.keys(organizationQueryDto).length) return await this.all();
+
+      const client = createClient();
       const db = await connect(client);
       const result: FindCursor = await db
         .collection(collectionName)
@@ -74,7 +74,9 @@ export default class OrganizationRepositoryImpl
     }
   };
 
-  #buildFilter = (organizationQueryDto: OrganizationQueryDto): OrganizationQueryFilter => {
+  #buildFilter = (
+    organizationQueryDto: OrganizationQueryDto
+  ): OrganizationQueryFilter => {
     const filter: { [key: string]: any } = {};
 
     if (organizationQueryDto.name) filter.name = organizationQueryDto.name;

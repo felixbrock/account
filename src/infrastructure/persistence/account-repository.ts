@@ -47,10 +47,10 @@ export default class AccountRepositoryImpl implements IAccountRepository {
   public findBy = async (
     accountQueryDto: AccountQueryDto
   ): Promise<Account[]> => {
-    if (!Object.keys(accountQueryDto).length) return this.all();
-
-    const client = createClient();
     try {
+      if (!Object.keys(accountQueryDto).length) return await this.all();
+
+      const client = createClient();
       const db = await connect(client);
       const result: FindCursor = await db
         .collection(collectionName)
