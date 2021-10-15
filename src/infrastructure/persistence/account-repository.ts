@@ -5,7 +5,6 @@ import {
   AccountQueryDto,
   IAccountRepository,
 } from '../../domain/account/i-account-repository';
-import Result from '../../domain/value-types/transient-types/result';
 import { close, connect, createClient } from './db/mongo-db';
 
 interface AccountPersistence {
@@ -132,15 +131,8 @@ export default class AccountRepositoryImpl implements IAccountRepository {
     }
   };
 
-  #toEntity = (accountProperties: AccountProperties): Account => {
-    const createAccountResult: Result<Account> =
-      Account.create(accountProperties);
-
-    if (createAccountResult.error) throw new Error(createAccountResult.error);
-    if (!createAccountResult.value) throw new Error('Account creation failed');
-
-    return createAccountResult.value;
-  };
+  #toEntity = (accountProperties: AccountProperties): Account =>
+    Account.create(accountProperties);
 
   #buildProperties = (account: AccountPersistence): AccountProperties => ({
     // eslint-disable-next-line no-underscore-dangle

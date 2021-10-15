@@ -21,7 +21,7 @@ export default class ReadAccountsController extends BaseController {
     this.#readAccounts = readAccounts;
   }
 
-  #buildRequestDto = (httpRequest: Request): Result<ReadAccountsRequestDto> => {
+  #buildRequestDto = (httpRequest: Request): ReadAccountsRequestDto => {
     const {
       userId,
       organizationId,
@@ -37,29 +37,22 @@ export default class ReadAccountsController extends BaseController {
       modifiedOnEnd,
       timezoneOffset,
     ]);
+
     if (!requestValid)
       throw new Error(
         'Request query parameter are supposed to be in string format'
       );
 
-    try {
-      return Result.ok({
-        modifiedOnStart:
-          typeof modifiedOnStart === 'string'
-            ? this.#buildDate(modifiedOnStart)
-            : undefined,
-        modifiedOnEnd:
-          typeof modifiedOnEnd === 'string'
-            ? this.#buildDate(modifiedOnEnd)
-            : undefined,
-      });
-    } catch (error: unknown) {
-      if (typeof error === 'string')
-        return Result.fail(error);
-      if (error instanceof Error)
-        return Result.fail(error.message);
-      return Result.fail('Unknown error occured');
-    }
+    return {
+      modifiedOnStart:
+        typeof modifiedOnStart === 'string'
+          ? this.#buildDate(modifiedOnStart)
+          : undefined,
+      modifiedOnEnd:
+        typeof modifiedOnEnd === 'string'
+          ? this.#buildDate(modifiedOnEnd)
+          : undefined,
+    };
   };
 
   #buildDate = (timestamp: string): number => {
@@ -121,23 +114,14 @@ export default class ReadAccountsController extends BaseController {
       if (!getUserAccountInfoResult.value)
         throw new Error('Authorization failed');
 
-      const buildDtoResult: Result<ReadAccountsRequestDto> =
-        this.#buildRequestDto(req);
-
-      if (buildDtoResult.error)
-        return ReadAccountsController.badRequest(res, buildDtoResult.error);
-      if (!buildDtoResult.value)
-        return ReadAccountsController.badRequest(
-          res,
-          'Invalid request query paramerters'
-        );
+      const buildDtoResult: ReadAccountsRequestDto = this.#buildRequestDto(req);
 
       const authDto: ReadAccountsAuthDto = this.#buildAuthDto(
         getUserAccountInfoResult.value
       );
 
       const useCaseResult: ReadAccountsResponseDto =
-        await this.#readAccounts.execute(buildDtoResult.value, authDto);
+        await this.#readAccounts.execute(buildDtoResult, authDto);
 
       if (useCaseResult.error) {
         return ReadAccountsController.badRequest(res, useCaseResult.error);

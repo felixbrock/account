@@ -1,8 +1,8 @@
 import { Account } from '../entities/account';
 import IUseCase from '../services/use-case';
-import Result from '../value-types/transient-types/result';
 import { IAccountRepository } from './i-account-repository';
 import { AccountDto, buildAccountDto } from './account-dto';
+import Result from '../value-types/transient-types/result';
 
 export interface ReadAccountRequestDto {
   accountId: string;

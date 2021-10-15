@@ -2,13 +2,12 @@
 import { ObjectId } from 'mongodb';
 import IUseCase from '../services/use-case';
 import { Organization, OrganizationProperties } from '../entities/organization';
-import { buildOrganizationDto, OrganizationDto } from './organization-dto';
 import { IOrganizationRepository } from './i-organization-repository';
-import Result from '../value-types/transient-types/result';
 import {
   ReadOrganizations,
   ReadOrganizationsResponseDto,
 } from './read-organizations';
+import Result from '../value-types/transient-types/result';
 
 export interface CreateOrganizationRequestDto {
   name: string;
@@ -18,7 +17,7 @@ export interface CreateOrganizationAuthDto {
   isAdmin: boolean;
 }
 
-export type CreateOrganizationResponseDto = Result<OrganizationDto>;
+export type CreateOrganizationResponseDto = Result<string>;
 
 export class CreateOrganization
   implements
@@ -44,16 +43,15 @@ export class CreateOrganization
     request: CreateOrganizationRequestDto,
     auth: CreateOrganizationAuthDto
   ): Promise<CreateOrganizationResponseDto> {
-    const organization: Result<Organization> =
-      this.#createOrganization(request);
-    if (!organization.value) return organization;
+    if (!auth.isAdmin)
+      Promise.reject(new Error('Not authorized to perform action'));
 
     try {
-      if (!auth.isAdmin) throw new Error('Not authorized to perform action');
+      const organization: Organization = this.#createOrganization(request);
 
       const readOrganizationsResult: ReadOrganizationsResponseDto =
         await this.#readOrganizations.execute(
-          { name: organization.value.name },
+          { name: organization.name },
           { isAdmin: auth.isAdmin }
         );
 
@@ -67,21 +65,21 @@ export class CreateOrganization
         );
 
       // TODO Install error handling
-      await this.#organizationRepository.insertOne(organization.value);
-
-      return Result.ok(
-        buildOrganizationDto(organization.value)
+      const insertResult = await this.#organizationRepository.insertOne(
+        organization
       );
+
+      return Result.ok(insertResult);
     } catch (error: unknown) {
-      if(typeof error === 'string') return Result.fail(error);
-      if(error instanceof Error) return Result.fail(error.message);
+      if (typeof error === 'string') return Result.fail(error);
+      if (error instanceof Error) return Result.fail(error.message);
       return Result.fail('Unknown error occured');
     }
   }
 
   #createOrganization = (
     request: CreateOrganizationRequestDto
-  ): Result<Organization> => {
+  ): Organization => {
     const organizationProperties: OrganizationProperties = {
       id: new ObjectId().toHexString(),
       name: request.name,

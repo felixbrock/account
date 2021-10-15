@@ -1,5 +1,3 @@
-import Result from '../value-types/transient-types/result';
-
 export interface OrganizationProperties {
   id: string;
   name: string;
@@ -37,11 +35,11 @@ export class Organization {
 
   public static create(
     properties: OrganizationProperties
-  ): Result<Organization> {
-    if (!properties.id) return Result.fail('Organization must have id');
-    if (!properties.name) return Result.fail('Organization must have name');
+  ): Organization {
+    if (!properties.id) throw new Error('Organization must have id');
+    if (!properties.name) throw new Error('Organization must have name');
 
     const organization = new Organization(properties);
-    return Result.ok(organization);
+    return organization;
   }
 }

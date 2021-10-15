@@ -45,10 +45,11 @@ export abstract class BaseController {
     jwt: string,
     readAccounts: ReadAccounts
   ): Promise<Result<UserAccountInfo>> {
-    if (!jwt) return Result.fail('Unauthorized');
+    if (!jwt) return Promise.reject(new Error('Unauthorized'));
 
     const authPayload = jsonwebtoken.decode(jwt, { json: true });
-    if (!authPayload) return Result.fail('Unauthorized - No auth payload');
+    if (!authPayload)
+      return Promise.reject(new Error('Unauthorized - No auth payload'));
 
     try {
       const readAccountsResult: ReadAccountsResponseDto =
@@ -68,9 +69,9 @@ export abstract class BaseController {
           : false,
       });
     } catch (error: unknown) {
-      if (typeof error === 'string') return Result.fail(error);
-      if (error instanceof Error) return Result.fail(error.message);
-      return Result.fail('Unknown error occured');
+      if (typeof error === 'string') return Promise.reject(error);
+      if (error instanceof Error) return Promise.reject(error.message);
+      return Promise.reject(new Error('Unknown error occured'));
     }
   }
 

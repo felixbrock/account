@@ -8,7 +8,6 @@ import {
   OrganizationQueryDto,
   IOrganizationRepository,
 } from '../../domain/organization/i-organization-repository';
-import Result from '../../domain/value-types/transient-types/result';
 import { close, connect, createClient } from './db/mongo-db';
 
 interface OrganizationPersistence {
@@ -137,20 +136,8 @@ export default class OrganizationRepositoryImpl
     }
   };
 
-  #toEntity = (
-    organizationProperties: OrganizationProperties
-  ): Organization => {
-    const createOrganizationResult: Result<Organization> = Organization.create(
-      organizationProperties
-    );
-
-    if (createOrganizationResult.error)
-      throw new Error(createOrganizationResult.error);
-    if (!createOrganizationResult.value)
-      throw new Error('Organization creation failed');
-
-    return createOrganizationResult.value;
-  };
+  #toEntity = (organizationProperties: OrganizationProperties): Organization =>
+    Organization.create(organizationProperties);
 
   #buildProperties = (
     organization: OrganizationPersistence

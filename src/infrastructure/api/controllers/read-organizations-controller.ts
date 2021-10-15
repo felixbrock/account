@@ -28,9 +28,7 @@ export default class ReadOrganizationsController extends BaseController {
     this.#readAccounts = readAccounts;
   }
 
-  #buildRequestDto = (
-    httpRequest: Request
-  ): Result<ReadOrganizationsRequestDto> => {
+  #buildRequestDto = (httpRequest: Request): ReadOrganizationsRequestDto => {
     const { name, modifiedOnStart, modifiedOnEnd, timezoneOffset } =
       httpRequest.query;
 
@@ -45,23 +43,17 @@ export default class ReadOrganizationsController extends BaseController {
         'Request query parameter are supposed to be in string format'
       );
 
-    try {
-      return Result.ok({
-        name: typeof name === 'string' ? name : undefined,
-        modifiedOnStart:
-          typeof modifiedOnStart === 'string'
-            ? this.#buildDate(modifiedOnStart)
-            : undefined,
-        modifiedOnEnd:
-          typeof modifiedOnEnd === 'string'
-            ? this.#buildDate(modifiedOnEnd)
-            : undefined,
-      });
-    } catch (error: unknown) {
-      if(typeof error === 'string') return Result.fail(error);
-      if(error instanceof Error) return Result.fail(error.message);
-      return Result.fail('Unknown error occured');
-    }
+    return {
+      name: typeof name === 'string' ? name : undefined,
+      modifiedOnStart:
+        typeof modifiedOnStart === 'string'
+          ? this.#buildDate(modifiedOnStart)
+          : undefined,
+      modifiedOnEnd:
+        typeof modifiedOnEnd === 'string'
+          ? this.#buildDate(modifiedOnEnd)
+          : undefined,
+    };
   };
 
   #buildDate = (timestamp: string): number => {
@@ -125,26 +117,15 @@ export default class ReadOrganizationsController extends BaseController {
       if (!getUserAccountInfoResult.value)
         throw new Error('Authorization failed');
 
-      const buildDtoResult: Result<ReadOrganizationsRequestDto> =
+      const buildDtoResult: ReadOrganizationsRequestDto =
         this.#buildRequestDto(req);
-
-      if (buildDtoResult.error)
-        return ReadOrganizationsController.badRequest(
-          res,
-          buildDtoResult.error
-        );
-      if (!buildDtoResult.value)
-        return ReadOrganizationsController.badRequest(
-          res,
-          'Invalid request query paramerters'
-        );
 
       const authDto: ReadOrganizationsAuthDto = this.#buildAuthDto(
         getUserAccountInfoResult.value
       );
 
       const useCaseResult: ReadOrganizationsResponseDto =
-        await this.#readOrganizations.execute(buildDtoResult.value, authDto);
+        await this.#readOrganizations.execute(buildDtoResult, authDto);
 
       if (useCaseResult.error) {
         return ReadOrganizationsController.badRequest(res, useCaseResult.error);
