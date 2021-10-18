@@ -1,5 +1,7 @@
+import compression from 'compression';
 import cors from 'cors';
 import express, { Application } from 'express';
+import helmet from 'helmet';
 import v1Router from './routes/v1';
 
 interface AppConfig {
@@ -35,9 +37,9 @@ export default class ExpressApp {
     this.#expressApp.use(express.json());
     this.#expressApp.use(express.urlencoded({ extended: true }));
     this.#expressApp.use(cors());
-    // this.#expressApp.use(compression());
+    this.#expressApp.use(compression());
     // this.#expressApp.use(morgan("combined"));
-    // this.#expressApp.use(helmet());
+    this.#expressApp.use(helmet());
     this.#expressApp.use(v1Router);
   }
 }
