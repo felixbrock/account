@@ -57,6 +57,9 @@ export default class CreateAccountController extends BaseController {
       if (!getUserAccountInfoResult.value)
         throw new Error('Authorization failed');
 
+      if(!getUserAccountInfoResult.value.isAdmin)
+          return CreateAccountController.unauthorized(res, 'Not authorized to perform action');
+
       const requestDto: CreateAccountRequestDto = this.#buildRequestDto(req);
       const authDto: CreateAccountAuthDto = this.#buildAuthDto(
         getUserAccountInfoResult.value

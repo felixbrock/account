@@ -61,6 +61,12 @@ export default class CreateOrganizationController extends BaseController {
       if (!getUserAccountInfoResult.value)
         throw new Error('Authorization failed');
 
+      if (!getUserAccountInfoResult.value.isAdmin)
+        return CreateOrganizationController.unauthorized(
+          res,
+          'Not authorized to perform action'
+        );
+
       const requestDto: CreateOrganizationRequestDto =
         this.#buildRequestDto(req);
       const authDto: CreateOrganizationAuthDto = this.#buildAuthDto(
@@ -83,9 +89,11 @@ export default class CreateOrganizationController extends BaseController {
         CodeHttp.CREATED
       );
     } catch (error: unknown) {
-      if(typeof error === 'string') return CreateOrganizationController.fail(res, error);
-      if(error instanceof Error) return CreateOrganizationController.fail(res, error);
-      return CreateOrganizationController.fail(res,'Unknown error occured');
+      if (typeof error === 'string')
+        return CreateOrganizationController.fail(res, error);
+      if (error instanceof Error)
+        return CreateOrganizationController.fail(res, error);
+      return CreateOrganizationController.fail(res, 'Unknown error occured');
     }
   }
 }
