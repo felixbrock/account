@@ -15,23 +15,23 @@ export class Account {
 
   #modifiedOn: number;
 
-  public get id(): string {
+  get id(): string {
     return this.#id;
   }
 
-  public get userId(): string {
+  get userId(): string {
     return this.#userId;
   }
 
-  public get organizationId(): string {
+  get organizationId(): string {
     return this.#organizationId;
   }
 
-  public get modifiedOn(): number {
+  get modifiedOn(): number {
     return this.#modifiedOn;
   }
 
-  public set modifiedOn(modifiedOn: number) {
+  set modifiedOn(modifiedOn: number) {
     this.#modifiedOn = modifiedOn;
   }
 
@@ -42,7 +42,7 @@ export class Account {
     this.#modifiedOn = properties.modifiedOn || Date.now();
   }
 
-  public static create(
+  static create(
     properties: AccountProperties
   ): Account {  
     if (!properties.id) throw new Error('Account must have id');

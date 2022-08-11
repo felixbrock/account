@@ -2,20 +2,21 @@ import { Router } from 'express';
 import CreateOrganizationController from '../controllers/create-organization-controller';
 import ReadOrganizationController from '../controllers/read-organization-controller';
 import app from '../../ioc-register';
-import AccountDomain from '../../../domain/account-domain';
 
 const organizationRoutes = Router();
 
-const accountDomain: AccountDomain = app.accountMain;
+const createOrganization = app.resolve('createOrganization');
+const readOrganization = app.resolve('readOrganization');
+const readAccounts = app.resolve('readAccounts');
 
 const createOrganizationController = new CreateOrganizationController(
-  accountDomain.createOrganization,
-  accountDomain.readAccounts
+  createOrganization,
+  readAccounts
 );
 
 const readOrganizationController = new ReadOrganizationController(
-  accountDomain.readOrganization,
-  accountDomain.readAccounts
+  readOrganization,
+  readAccounts
 );
 
 organizationRoutes.post('/', (req, res) =>

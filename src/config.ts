@@ -1,12 +1,12 @@
 const nodeEnv = process.env.NODE_ENV || 'development';
 const defaultPort = 8081;
-const port = process.env.PORT
-  ? parseInt(process.env.PORT, 10)
-  : defaultPort;
+const port = process.env.PORT ? parseInt(process.env.PORT, 10) : defaultPort;
 const apiRoot = process.env.API_ROOT || 'api';
 
-const getServiceDiscoveryNamespace = (): string => {
+const getServiceDiscoveryNamespace = (): string | null => {
   switch (nodeEnv) {
+    case 'development':
+      return null;
     case 'test':
       return 'account-staging';
     case 'production':
@@ -63,7 +63,7 @@ export const appConfig = {
   express: {
     port,
     mode: nodeEnv,
-    apiRoot
+    apiRoot,
   },
   cloud: {
     serviceDiscoveryNamespace: getServiceDiscoveryNamespace(),

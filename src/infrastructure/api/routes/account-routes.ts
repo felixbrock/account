@@ -2,18 +2,18 @@ import { Router } from 'express';
 import CreateAccountController from '../controllers/create-account-controller';
 import ReadAccountController from '../controllers/read-account-controller';
 import app from '../../ioc-register';
-import AccountDomain from '../../../domain/account-domain';
 
 const accountRoutes = Router();
 
-const accountDomain: AccountDomain = app.accountMain;
+
+const readAccounts = app.resolve('readAccounts');
 
 const createAccountController = new CreateAccountController(
-  accountDomain.createAccount, accountDomain.readAccounts
+  app.resolve('createAccount'), readAccounts
 );
 
 const readAccountController = new ReadAccountController(
-  accountDomain.readAccount, accountDomain.readAccounts
+  app.resolve('readAccount'), readAccounts
 );
 
 accountRoutes.post('/', (req, res) =>

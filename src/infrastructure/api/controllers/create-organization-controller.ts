@@ -19,7 +19,7 @@ export default class CreateOrganizationController extends BaseController {
 
   #readAccounts: ReadAccounts;
 
-  public constructor(
+  constructor(
     createOrganization: CreateOrganization,
     readAccounts: ReadAccounts
   ) {

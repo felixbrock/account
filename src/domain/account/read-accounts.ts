@@ -25,11 +25,11 @@ export class ReadAccounts
 {
   #accountRepository: IAccountRepository;
 
-  public constructor(accountRepository: IAccountRepository) {
+  constructor(accountRepository: IAccountRepository) {
     this.#accountRepository = accountRepository;
   }
 
-  public async execute(
+  async execute(
     request: ReadAccountsRequestDto,
     auth: ReadAccountsAuthDto
   ): Promise<ReadAccountsResponseDto> {

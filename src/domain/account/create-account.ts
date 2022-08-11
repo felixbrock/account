@@ -33,7 +33,7 @@ export class CreateAccount
 
   #readAccounts: ReadAccounts;
 
-  public constructor(
+  constructor(
     accountRepository: IAccountRepository,
     organizationRepository: IOrganizationRepository,
     readAccounts: ReadAccounts
@@ -43,7 +43,7 @@ export class CreateAccount
     this.#readAccounts = readAccounts;
   }
 
-  public async execute(
+  async execute(
     request: CreateAccountRequestDto,
     auth: CreateAccountAuthDto
   ): Promise<CreateAccountResponseDto> {

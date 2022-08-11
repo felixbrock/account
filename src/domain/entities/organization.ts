@@ -11,19 +11,19 @@ export class Organization {
 
   #modifiedOn: number;
 
-  public get id(): string {
+  get id(): string {
     return this.#id;
   }
 
-  public get name(): string {
+  get name(): string {
     return this.#name;
   }
 
-  public get modifiedOn(): number {
+  get modifiedOn(): number {
     return this.#modifiedOn;
   }
 
-  public set modifiedOn(modifiedOn: number) {
+  set modifiedOn(modifiedOn: number) {
     this.#modifiedOn = modifiedOn;
   }
 
@@ -33,7 +33,7 @@ export class Organization {
     this.#modifiedOn = properties.modifiedOn || Date.now();
   }
 
-  public static create(
+  static create(
     properties: OrganizationProperties
   ): Organization {
     if (!properties.id) throw new Error('Organization must have id');

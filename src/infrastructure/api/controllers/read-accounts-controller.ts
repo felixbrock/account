@@ -16,7 +16,7 @@ import {
 export default class ReadAccountsController extends BaseController {
   #readAccounts: ReadAccounts;
 
-  public constructor(readAccounts: ReadAccounts) {
+  constructor(readAccounts: ReadAccounts) {
     super();
     this.#readAccounts = readAccounts;
   }

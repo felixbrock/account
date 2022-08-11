@@ -31,7 +31,7 @@ export class CreateOrganization
 
   #readOrganizations: ReadOrganizations;
 
-  public constructor(
+  constructor(
     organizationRepository: IOrganizationRepository,
     readOrganizations: ReadOrganizations
   ) {
@@ -39,7 +39,7 @@ export class CreateOrganization
     this.#readOrganizations = readOrganizations;
   }
 
-  public async execute(
+  async execute(
     request: CreateOrganizationRequestDto,
     auth: CreateOrganizationAuthDto
   ): Promise<CreateOrganizationResponseDto> {

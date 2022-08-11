@@ -25,11 +25,11 @@ export class ReadOrganization
 {
   #organizationRepository: IOrganizationRepository;
 
-  public constructor(organizationRepository: IOrganizationRepository) {
+  constructor(organizationRepository: IOrganizationRepository) {
     this.#organizationRepository = organizationRepository;
   }
 
-  public async execute(
+  async execute(
     request: ReadOrganizationRequestDto,
     auth: ReadOrganizationAuthDto
   ): Promise<ReadOrganizationResponseDto> {

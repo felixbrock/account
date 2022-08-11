@@ -19,7 +19,7 @@ export default class CreateAccountController extends BaseController {
 
   #readAccounts: ReadAccounts;
 
-  public constructor(createAccount: CreateAccount, readAccounts: ReadAccounts) {
+  constructor(createAccount: CreateAccount, readAccounts: ReadAccounts) {
     super();
     this.#createAccount = createAccount;
     this.#readAccounts = readAccounts;

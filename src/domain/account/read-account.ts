@@ -21,11 +21,11 @@ export class ReadAccount
 {
   #accountRepository: IAccountRepository;
 
-  public constructor(accountRepository: IAccountRepository) {
+  constructor(accountRepository: IAccountRepository) {
     this.#accountRepository = accountRepository;
   }
 
-  public async execute(
+  async execute(
     request: ReadAccountRequestDto,
     auth: ReadAccountAuthDto
   ): Promise<ReadAccountResponseDto> {
