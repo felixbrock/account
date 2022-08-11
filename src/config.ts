@@ -1,9 +1,20 @@
-export const nodeEnv = process.env.NODE_ENV || 'development';
-export const defaultPort = 8081;
-export const port = process.env.PORT
+const nodeEnv = process.env.NODE_ENV || 'development';
+const defaultPort = 8081;
+const port = process.env.PORT
   ? parseInt(process.env.PORT, 10)
   : defaultPort;
-export const apiRoot = process.env.API_ROOT || 'api';
+const apiRoot = process.env.API_ROOT || 'api';
+
+const getServiceDiscoveryNamespace = (): string => {
+  switch (nodeEnv) {
+    case 'test':
+      return 'account-staging';
+    case 'production':
+      return 'account';
+    default:
+      throw new Error('No valid nodenv value provided');
+  }
+};
 
 export interface MongoDbConfig {
   url: string;
@@ -35,10 +46,29 @@ const getMongodbConfig = (): MongoDbConfig => {
   }
 };
 
+const getCognitoUserPoolId = (): string => {
+  switch (nodeEnv) {
+    case 'development':
+      return 'eu-central-1_HYLD4MoTL';
+    case 'test':
+      return 'eu-central-1_htA4V0E1g';
+    case 'production':
+      return 'eu-central-1_fttc090sQ';
+    default:
+      throw new Error('No valid nodenv provided');
+  }
+};
+
 export const appConfig = {
   express: {
     port,
     mode: nodeEnv,
+    apiRoot
+  },
+  cloud: {
+    serviceDiscoveryNamespace: getServiceDiscoveryNamespace(),
+    userPoolId: getCognitoUserPoolId(),
+    region: 'eu-central-1',
   },
   mongodb: {
     ...getMongodbConfig(),

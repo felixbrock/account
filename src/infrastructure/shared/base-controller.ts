@@ -1,9 +1,8 @@
 import { Request, Response } from 'express';
 import jsonwebtoken from 'jsonwebtoken';
-import {
-  ReadAccounts,
-  ReadAccountsResponseDto,
-} from '../../domain/account/read-accounts';
+import jwksClient from 'jwks-rsa';
+import { appConfig } from '../../config';
+import { ReadAccounts, ReadAccountsResponseDto } from '../../domain/account/read-accounts';
 import Result from '../../domain/value-types/transient-types/result';
 
 export enum CodeHttp {
@@ -25,15 +24,11 @@ export interface UserAccountInfo {
 }
 
 export abstract class BaseController {
-  public static jsonResponse(
-    res: Response,
-    code: number,
-    message: string
-  ): Response {
+  static jsonResponse(res: Response, code: number, message: string): Response {
     return res.status(code).json({ message });
   }
 
-  public async execute(req: Request, res: Response): Promise<void | Response> {
+  async execute(req: Request, res: Response): Promise<void | Response> {
     try {
       await this.executeImpl(req, res);
     } catch (error) {
@@ -41,18 +36,39 @@ export abstract class BaseController {
     }
   }
 
-  public static async getUserAccountInfo(
+  static async getUserAccountInfo(
     jwt: string,
     readAccounts: ReadAccounts
   ): Promise<Result<UserAccountInfo>> {
-    if (!jwt) return Promise.reject(new Error('Unauthorized'));
-
-    const authPayload = jsonwebtoken.decode(jwt, { json: true });
-    if (!authPayload)
-      return Promise.reject(new Error('Unauthorized - No auth payload'));
+    if (!jwt) return Result.fail('Unauthorized');
 
     try {
-      const readAccountsResult: ReadAccountsResponseDto =
+      const client = jwksClient({
+        jwksUri: `https://cognito-idp.${appConfig.cloud.region}.amazonaws.com/${appConfig.cloud.userPoolId}/.well-known/jwks.json`,
+      });
+
+      const unverifiedDecodedAuthPayload = jsonwebtoken.decode(jwt, {
+        json: true,
+        complete: true,
+      });
+
+      if (!unverifiedDecodedAuthPayload) return Result.fail('Unauthorized');
+
+      const { kid } = unverifiedDecodedAuthPayload.header;
+
+      if (!kid) return Result.fail('Unauthorized');
+
+      const key = await client.getSigningKey(kid);
+      const signingKey = key.getPublicKey();
+
+      const authPayload = jsonwebtoken.verify(jwt, signingKey, {
+        algorithms: ['RS256'],
+      });
+
+      if (typeof authPayload === 'string')
+        return Result.fail('Unexpected auth payload format');
+
+        const readAccountsResult: ReadAccountsResponseDto =
         await readAccounts.execute({}, { userId: authPayload.username });
 
       if (!readAccountsResult.value)
@@ -75,7 +91,7 @@ export abstract class BaseController {
     }
   }
 
-  public static ok<T>(res: Response, dto?: T, created?: CodeHttp): Response {
+  static ok<T>(res: Response, dto?: T, created?: CodeHttp): Response {
     const codeHttp: CodeHttp = created || CodeHttp.OK;
     if (dto) {
       res.type('application/json');
@@ -85,7 +101,7 @@ export abstract class BaseController {
     return res.sendStatus(codeHttp);
   }
 
-  public static badRequest(res: Response, message?: string): Response {
+  static badRequest(res: Response, message?: string): Response {
     return BaseController.jsonResponse(
       res,
       CodeHttp.BAD_REQUEST,
@@ -93,7 +109,7 @@ export abstract class BaseController {
     );
   }
 
-  public static unauthorized(res: Response, message?: string): Response {
+  static unauthorized(res: Response, message?: string): Response {
     return BaseController.jsonResponse(
       res,
       CodeHttp.UNAUTHORIZED,
@@ -101,7 +117,7 @@ export abstract class BaseController {
     );
   }
 
-  public static notFound(res: Response, message?: string): Response {
+  static notFound(res: Response, message?: string): Response {
     return BaseController.jsonResponse(
       res,
       CodeHttp.NOT_FOUND,
@@ -109,7 +125,7 @@ export abstract class BaseController {
     );
   }
 
-  public static fail(res: Response, error: Error | string): Response {
+  static fail(res: Response, error: Error | string): Response {
     return res.status(CodeHttp.SERVER_ERROR).json({
       message: error.toString(),
     });
