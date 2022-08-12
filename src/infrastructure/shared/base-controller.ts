@@ -19,7 +19,7 @@ export enum CodeHttp {
 export interface UserAccountInfo {
   userId: string;
   accountId: string;
-  organizationId: string;
+  callerOrganizationId: string;
   isAdmin: boolean;
 }
 
@@ -79,7 +79,7 @@ export abstract class BaseController {
       return Result.ok({
         userId: authPayload.username,
         accountId: readAccountsResult.value[0].id,
-        organizationId: readAccountsResult.value[0].organizationId,
+        callerOrganizationId: readAccountsResult.value[0].organizationId,
         isAdmin: authPayload['cognito:groups']
           ? authPayload['cognito:groups'].includes('admin')
           : false,

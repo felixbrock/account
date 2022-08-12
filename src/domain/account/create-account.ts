@@ -10,7 +10,7 @@ import Result from '../value-types/transient-types/result';
 
 export interface CreateAccountRequestDto {
   userId: string;
-  organizationId: string;
+  targetOrganizationId: string;
 }
 
 export interface CreateAccountAuthDto {
@@ -92,7 +92,7 @@ export class CreateAccount
     const accountProperties: AccountProperties = {
       id: new ObjectId().toHexString(),
       userId: request.userId,
-      organizationId: request.organizationId,
+      organizationId: request.targetOrganizationId,
     };
 
     return Account.create(accountProperties);

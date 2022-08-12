@@ -29,13 +29,13 @@ export default class ReadOrganizationController extends BaseController {
   }
 
   #buildRequestDto = (httpRequest: Request): ReadOrganizationRequestDto => ({
-    organizationId: httpRequest.params.organizationId,
+    targetOrganizationId: httpRequest.params.organizationId,
   });
 
   #buildAuthDto = (
     userAccountInfo: UserAccountInfo
   ): ReadOrganizationAuthDto => ({
-    organizationId: userAccountInfo.organizationId,
+    callerOrganizationId: userAccountInfo.callerOrganizationId,
     isAdmin: userAccountInfo.isAdmin,
   });
 

@@ -5,11 +5,11 @@ import { IOrganizationRepository } from './i-organization-repository';
 import { OrganizationDto, buildOrganizationDto } from './organization-dto';
 
 export interface ReadOrganizationRequestDto {
-  organizationId: string;
+  targetOrganizationId: string;
 }
 
 export interface ReadOrganizationAuthDto {
-  organizationId: string;
+  callerOrganizationId: string;
   isAdmin: boolean;
 }
 
@@ -34,14 +34,14 @@ export class ReadOrganization
     auth: ReadOrganizationAuthDto
   ): Promise<ReadOrganizationResponseDto> {
     try {
-      if (request.organizationId !== auth.organizationId && !auth.isAdmin)
+      if (request.targetOrganizationId !== auth.callerOrganizationId && !auth.isAdmin)
       throw new Error('Not authorized to perform action');
 
       const organization: Organization | null =
-        await this.#organizationRepository.findOne(request.organizationId);
+        await this.#organizationRepository.findOne(request.targetOrganizationId);
       if (!organization)
         throw new Error(
-          `Organization with id ${request.organizationId} does not exist`
+          `Organization with id ${request.targetOrganizationId} does not exist`
         );
 
       return Result.ok(buildOrganizationDto(organization));
