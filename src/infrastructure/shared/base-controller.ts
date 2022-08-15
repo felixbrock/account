@@ -72,8 +72,8 @@ export abstract class BaseController {
       if (typeof authPayload === 'string')
         return Result.fail('Unexpected auth payload format');
 
-      const isSystemInternal = authPayload['cognito:groups']
-        ? authPayload['cognito:groups'].includes('system-internal')
+      const isSystemInternal = authPayload.scope
+        ? authPayload.scope.includes('system-internal/system-internal')
         : false;
 
       const isAdmin = authPayload['cognito:groups']
