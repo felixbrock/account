@@ -2,7 +2,10 @@ import { Request, Response } from 'express';
 import jsonwebtoken from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import { appConfig } from '../../config';
-import { ReadAccounts, ReadAccountsResponseDto } from '../../domain/account/read-accounts';
+import {
+  ReadAccounts,
+  ReadAccountsResponseDto,
+} from '../../domain/account/read-accounts';
 import Result from '../../domain/value-types/transient-types/result';
 
 export enum CodeHttp {
@@ -17,10 +20,11 @@ export enum CodeHttp {
 }
 
 export interface UserAccountInfo {
-  userId: string;
-  accountId: string;
-  callerOrganizationId: string;
+  userId?: string;
+  accountId?: string;
+  callerOrganizationId?: string;
   isAdmin: boolean;
+  isSystemInternal: boolean;
 }
 
 export abstract class BaseController {
@@ -68,7 +72,27 @@ export abstract class BaseController {
       if (typeof authPayload === 'string')
         return Result.fail('Unexpected auth payload format');
 
-        const readAccountsResult: ReadAccountsResponseDto =
+      const isAdmin = authPayload['cognito:groups']
+        ? authPayload['cognito:groups'].includes('admin')
+        : false;
+
+      const isSystemInternal = authPayload['cognito:groups']
+        ? authPayload['cognito:groups'].includes('system-internal')
+        : false;
+
+      if (!authPayload.username && !isAdmin && !isSystemInternal)
+        return Result.fail('Unauthorized');
+
+      if (!authPayload.username)
+        return Result.ok({
+          userId: undefined,
+          accountId: undefined,
+          callerOrganizationId: undefined,
+          isAdmin,
+          isSystemInternal,
+        });
+
+      const readAccountsResult: ReadAccountsResponseDto =
         await readAccounts.execute({}, { userId: authPayload.username });
 
       if (!readAccountsResult.value)
@@ -80,9 +104,8 @@ export abstract class BaseController {
         userId: authPayload.username,
         accountId: readAccountsResult.value[0].id,
         callerOrganizationId: readAccountsResult.value[0].organizationId,
-        isAdmin: authPayload['cognito:groups']
-          ? authPayload['cognito:groups'].includes('admin')
-          : false,
+        isAdmin,
+        isSystemInternal,
       });
     } catch (error: unknown) {
       if (typeof error === 'string') return Result.fail(error);

@@ -29,10 +29,14 @@ export default class ReadAccountController extends BaseController {
     accountId: httpRequest.params.accountId,
   });
 
-  #buildAuthDto = (userAccountInfo: UserAccountInfo): ReadAccountAuthDto => ({
-    accountId: userAccountInfo.accountId,
-    isAdmin: userAccountInfo.isAdmin,
-  });
+  #buildAuthDto = (userAccountInfo: UserAccountInfo): ReadAccountAuthDto => {
+    if (!userAccountInfo.accountId) throw new Error('Unauthorized');
+
+    return {
+      accountId: userAccountInfo.accountId,
+      isAdmin: userAccountInfo.isAdmin,
+    };
+  };
 
   protected async executeImpl(req: Request, res: Response): Promise<Response> {
     try {

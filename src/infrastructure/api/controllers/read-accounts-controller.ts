@@ -87,9 +87,11 @@ export default class ReadAccountsController extends BaseController {
     return !validationResults.includes(false);
   };
 
-  #buildAuthDto = (userAccountInfo: UserAccountInfo): ReadAccountsAuthDto => ({
-    userId: userAccountInfo.userId,
-  });
+  #buildAuthDto = (userAccountInfo: UserAccountInfo): ReadAccountsAuthDto => {
+    if (!userAccountInfo.userId) throw new Error('Unauthorized');
+
+    return { userId: userAccountInfo.userId };
+  };
 
   protected async executeImpl(req: Request, res: Response): Promise<Response> {
     try {
@@ -114,10 +116,12 @@ export default class ReadAccountsController extends BaseController {
       if (!getUserAccountInfoResult.value)
         throw new Error('Authorization failed');
 
+      const userAccountInfo = getUserAccountInfoResult.value;
+
       const buildDtoResult: ReadAccountsRequestDto = this.#buildRequestDto(req);
 
       const authDto: ReadAccountsAuthDto = this.#buildAuthDto(
-        getUserAccountInfoResult.value
+        userAccountInfo
       );
 
       const useCaseResult: ReadAccountsResponseDto =

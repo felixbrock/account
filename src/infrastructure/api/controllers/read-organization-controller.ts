@@ -19,10 +19,7 @@ export default class ReadOrganizationController extends BaseController {
 
   #readAccounts: ReadAccounts;
 
-  constructor(
-    readOrganization: ReadOrganization,
-    readAccounts: ReadAccounts
-  ) {
+  constructor(readOrganization: ReadOrganization, readAccounts: ReadAccounts) {
     super();
     this.#readOrganization = readOrganization;
     this.#readAccounts = readAccounts;
@@ -34,10 +31,14 @@ export default class ReadOrganizationController extends BaseController {
 
   #buildAuthDto = (
     userAccountInfo: UserAccountInfo
-  ): ReadOrganizationAuthDto => ({
-    callerOrganizationId: userAccountInfo.callerOrganizationId,
-    isAdmin: userAccountInfo.isAdmin,
-  });
+  ): ReadOrganizationAuthDto => {
+    if (!userAccountInfo.callerOrganizationId) throw new Error('Unauthorized');
+    
+    return {
+      callerOrganizationId: userAccountInfo.callerOrganizationId,
+      isAdmin: userAccountInfo.isAdmin,
+    };
+  };
 
   protected async executeImpl(req: Request, res: Response): Promise<Response> {
     try {

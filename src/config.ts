@@ -53,7 +53,7 @@ const getCognitoUserPoolId = (): string => {
     case 'test':
       return '';
     case 'production':
-      return '';
+      return 'eu-central-1_0muGtKMk3';
     default:
       throw new Error('No valid nodenv provided');
   }
