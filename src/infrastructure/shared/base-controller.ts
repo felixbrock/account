@@ -72,18 +72,23 @@ export abstract class BaseController {
       if (typeof authPayload === 'string')
         return Result.fail('Unexpected auth payload format');
 
-      const isAdmin = authPayload['cognito:groups']
-        ? authPayload['cognito:groups'].includes('admin')
-        : false;
-
       const isSystemInternal = authPayload['cognito:groups']
         ? authPayload['cognito:groups'].includes('system-internal')
         : false;
 
-      if (!authPayload.username && !isAdmin && !isSystemInternal)
+      const isAdmin = authPayload['cognito:groups']
+        ? authPayload['cognito:groups'].includes('admin')
+        : false;
+
+      if (isSystemInternal && isAdmin)
+        return Result.fail(
+          'Unauthorized - Conflicting caller authorization groups'
+        );
+
+      if (!authPayload.username && !isSystemInternal)
         return Result.fail('Unauthorized');
 
-      if (!authPayload.username)
+      if (isSystemInternal)
         return Result.ok({
           userId: undefined,
           accountId: undefined,
