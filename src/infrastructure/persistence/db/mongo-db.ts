@@ -2,10 +2,6 @@ import { Db, MongoClient, ServerApiVersion } from 'mongodb';
 import { appConfig } from '../../../config';
 
 export default class Dbo {
-  #something = ():void => console.log(appConfig);
-  
-  #anything = this.#something();
-
 	#client = new MongoClient(appConfig.mongodb.url, {
 		serverApi: ServerApiVersion.v1,
 	});
