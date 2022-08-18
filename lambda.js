@@ -1,4 +1,4 @@
-const dotenv =  require('dotenv');
+const dotenv = require('dotenv');
 
 dotenv.config();
 
@@ -7,10 +7,10 @@ const ExpressApp = require('./dist/infrastructure/api/express-app');
 // eslint-disable-next-line import/first
 const config = require('./dist/config');
 
-const serverlessExpress = require('@vendia/serverless-express');
+const serverlessExpress = require('serverless-http');
 
 const expressApp = new ExpressApp(config.appConfig.express);
 
-expressApp.start();
+console.log('starting app...');
 
-exports.handler = serverlessExpress({ app: expressApp.start() });
+module.exports.handler = serverlessExpress(expressApp.start());

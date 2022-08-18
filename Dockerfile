@@ -6,4 +6,5 @@ WORKDIR /app
 COPY ["package.json", "package-lock.json*", "./"]
 RUN npm install --production
 COPY . .
-CMD [ "node", "dist/index.js" ]
+# CMD [ "node", "dist/index.js" ]
+CMD [ "lambda.handler" ]
