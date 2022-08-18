@@ -10,7 +10,7 @@
     "clean": "rimraf dist",
     "build": "npm run clean && npm run tsc",
     "start": "npm run build && nodemon ./src/index.ts",
-    "deploy": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./deploy.ps1 -serviceName account",
+    "deploy": "serverless deploy",
     "debug": "npm run build && nodemon --inspect=3015 ./src/index.ts"
   },
   "repository": {
@@ -40,11 +40,13 @@
     "eslint-plugin-import": "^2.22.1",
     "nodemon": "^2.0.13",
     "prettier": "2.3.2",
+    "serverless": "^3.22.0",
     "ts-node": "^10.2.1",
     "typescript": "^4.3.5"
   },
   "dependencies": {
     "@aws-sdk/client-servicediscovery": "^3.30.0",
+    "@vendia/serverless-express": "^4.10.1",
     "awilix": "^7.0.3",
     "compression": "^1.7.4",
     "cors": "^2.8.5",

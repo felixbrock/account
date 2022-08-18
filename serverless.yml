@@ -1,0 +1,17 @@
+service: account-service
+
+useDotenv: true
+
+provider:
+ name: aws
+ runtime: nodejs16.x
+ memorySize: 512
+ timeout: 10
+ stage: production
+ region: eu-central-1
+
+functions:
+ api:
+   handler: lambda.handler
+   events:
+     - http: ANY /

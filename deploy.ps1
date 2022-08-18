@@ -1,3 +1,7 @@
+# package.json command:
+# "deploy": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./deploy.ps1 -serviceName account",
+
+
 param([string]$serviceName, [string]$env, [string]$version, [string]$previousVersion)
 
 if (-Not $serviceName) {
@@ -22,9 +26,9 @@ if(-Not ($env -eq $productionEnv -or $env -eq $testEnv)) {return write-host 'env
 # } 
 
 
-aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 085009017826.dkr.ecr.eu-central-1.amazonaws.com;
+aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 966593446935.dkr.ecr.eu-central-1.amazonaws.com;
 
-$name = "085009017826.dkr.ecr.eu-central-1.amazonaws.com/${serviceName}"
+$name = "966593446935.dkr.ecr.eu-central-1.amazonaws.com/${serviceName}"
 npm run build
 $tag = $(if ($env -eq $productionEnv) {$productionEnv} else {$testEnv})
 docker build --build-arg "ENV=${env}" -t "${name}:${tag}" .
@@ -39,5 +43,5 @@ $imagesToDelete = aws ecr list-images --repository-name $serviceName --filter "t
 $imagesToDelete = $imagesToDelete.replace('"', '""')
 aws ecr batch-delete-image --repository-name $serviceName --image-ids "$imagesToDelete"
 
-$clusterName = $(if ($env -eq $productionEnv) {'hivedive'} else {'hivedive-test'})
-aws ecs update-service --cluster ${clusterName} --service "${serviceName}-service" --force-new-deployment
+# $clusterName = $(if ($env -eq $productionEnv) {'hivedive'} else {'hivedive-test'})
+# aws ecs update-service --cluster ${clusterName} --service "${serviceName}-service" --force-new-deployment

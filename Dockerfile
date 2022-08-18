@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM node:12.18.1
+FROM public.ecr.aws/lambda/nodejs:16
 ARG ENV
 ENV NODE_ENV=$ENV
 WORKDIR /app
