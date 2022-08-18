@@ -6,6 +6,7 @@ import {
   ReadAccounts,
   ReadAccountsResponseDto,
 } from '../../domain/account/read-accounts';
+import { DbConnection } from '../../domain/services/i-db';
 import Result from '../../domain/value-types/transient-types/result';
 
 export enum CodeHttp {
@@ -42,7 +43,8 @@ export abstract class BaseController {
 
   static async getUserAccountInfo(
     jwt: string,
-    readAccounts: ReadAccounts
+    readAccounts: ReadAccounts,
+    dbConnection: DbConnection
   ): Promise<Result<UserAccountInfo>> {
     if (!jwt) return Result.fail('Unauthorized');
 
@@ -98,7 +100,7 @@ export abstract class BaseController {
         });
 
       const readAccountsResult: ReadAccountsResponseDto =
-        await readAccounts.execute({}, { userId: authPayload.username });
+        await readAccounts.execute({}, { userId: authPayload.username }, dbConnection);
 
       if (!readAccountsResult.value)
         throw new Error(`No account found for ${authPayload.username}`);

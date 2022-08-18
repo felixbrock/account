@@ -1,4 +1,4 @@
-import { Document, FindCursor, InsertOneResult, ObjectId } from 'mongodb';
+import { Db, Document, FindCursor, InsertOneResult, ObjectId } from 'mongodb';
 import sanitize from 'mongo-sanitize';
 import {
   Organization,
@@ -8,7 +8,6 @@ import {
   OrganizationQueryDto,
   IOrganizationRepository,
 } from '../../domain/organization/i-organization-repository';
-import { close, connect, createClient } from './db/mongo-db';
 
 interface OrganizationPersistence {
   _id: string;
@@ -26,15 +25,14 @@ const collectionName = 'organizations';
 export default class OrganizationRepositoryImpl
   implements IOrganizationRepository
 {
-  public findOne = async (id: string): Promise<Organization | null> => {
-    const client = createClient();
+  public findOne = async (
+    id: string,
+    dbConnection: Db
+  ): Promise<Organization | null> => {
     try {
-      const db = await connect(client);
-      const result: any = await db
+      const result: any = await dbConnection
         .collection(collectionName)
         .findOne({ _id: new ObjectId(sanitize(id)) });
-
-      close(client);
 
       if (!result) return null;
 
@@ -47,19 +45,17 @@ export default class OrganizationRepositoryImpl
   };
 
   public findBy = async (
-    organizationQueryDto: OrganizationQueryDto
+    organizationQueryDto: OrganizationQueryDto,
+    dbConnection: Db
   ): Promise<Organization[]> => {
     try {
-      if (!Object.keys(organizationQueryDto).length) return await this.all();
+      if (!Object.keys(organizationQueryDto).length)
+        return await this.all(dbConnection);
 
-      const client = createClient();
-      const db = await connect(client);
-      const result: FindCursor = await db
+      const result: FindCursor = await dbConnection
         .collection(collectionName)
         .find(this.#buildFilter(sanitize(organizationQueryDto)));
       const results = await result.toArray();
-
-      close(client);
 
       if (!results || !results.length) return [];
 
@@ -91,14 +87,12 @@ export default class OrganizationRepositoryImpl
     return filter;
   };
 
-  public all = async (): Promise<Organization[]> => {
-    const client = createClient();
+  public all = async (dbConnection: Db): Promise<Organization[]> => {
     try {
-      const db = await connect(client);
-      const result: FindCursor = await db.collection(collectionName).find();
+      const result: FindCursor = await dbConnection
+        .collection(collectionName)
+        .find();
       const results = await result.toArray();
-
-      close(client);
 
       if (!results || !results.length) return [];
 
@@ -112,12 +106,12 @@ export default class OrganizationRepositoryImpl
     }
   };
 
-  public insertOne = async (organization: Organization): Promise<string> => {
-    const client = createClient();
-
+  public insertOne = async (
+    organization: Organization,
+    dbConnection: Db
+  ): Promise<string> => {
     try {
-      const db = await connect(client);
-      const result: InsertOneResult<Document> = await db
+      const result: InsertOneResult<Document> = await dbConnection
         .collection(collectionName)
         .insertOne(this.#toPersistence(sanitize(organization)));
 
@@ -125,8 +119,6 @@ export default class OrganizationRepositoryImpl
         throw new Error(
           'Organization creation failed. Insert not acknowledged'
         );
-
-      close(client);
 
       return result.insertedId.toHexString();
     } catch (error: unknown) {

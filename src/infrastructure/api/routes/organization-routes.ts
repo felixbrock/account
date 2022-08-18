@@ -9,14 +9,17 @@ const createOrganization = app.resolve('createOrganization');
 const readOrganization = app.resolve('readOrganization');
 const readAccounts = app.resolve('readAccounts');
 
+const dbo = app.resolve('dbo');
+
+
 const createOrganizationController = new CreateOrganizationController(
   createOrganization,
-  readAccounts
+  readAccounts, dbo
 );
 
 const readOrganizationController = new ReadOrganizationController(
   readOrganization,
-  readAccounts
+  readAccounts, dbo
 );
 
 organizationRoutes.post('/', (req, res) =>

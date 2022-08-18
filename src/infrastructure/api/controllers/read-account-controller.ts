@@ -8,6 +8,7 @@ import {
 } from '../../../domain/account/read-account';
 import { ReadAccounts } from '../../../domain/account/read-accounts';
 import Result from '../../../domain/value-types/transient-types/result';
+import Dbo from '../../persistence/db/mongo-db';
 import {
   BaseController,
   CodeHttp,
@@ -19,10 +20,13 @@ export default class ReadAccountController extends BaseController {
 
   #readAccounts: ReadAccounts;
 
-  constructor(readAccount: ReadAccount, readAccounts: ReadAccounts) {
+  readonly #dbo: Dbo;
+
+  constructor(readAccount: ReadAccount, readAccounts: ReadAccounts, dbo: Dbo) {
     super();
     this.#readAccount = readAccount;
     this.#readAccounts = readAccounts;
+    this.#dbo = dbo;
   }
 
   #buildRequestDto = (httpRequest: Request): ReadAccountRequestDto => ({
@@ -48,7 +52,7 @@ export default class ReadAccountController extends BaseController {
       const jwt = authHeader.split(' ')[1];
 
       const getUserAccountInfoResult: Result<UserAccountInfo> =
-        await ReadAccountController.getUserAccountInfo(jwt, this.#readAccounts);
+        await ReadAccountController.getUserAccountInfo(jwt, this.#readAccounts,  this.#dbo);
 
       if (!getUserAccountInfoResult.success)
         return ReadAccountController.unauthorized(
@@ -65,7 +69,7 @@ export default class ReadAccountController extends BaseController {
       );
 
       const useCaseResult: ReadAccountResponseDto =
-        await this.#readAccount.execute(requestDto, authDto);
+        await this.#readAccount.execute(requestDto, authDto, this.#dbo);
 
       if (!useCaseResult.success) {
         return ReadAccountController.badRequest(res, useCaseResult.error);

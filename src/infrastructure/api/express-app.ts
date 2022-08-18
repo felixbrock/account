@@ -2,6 +2,8 @@ import compression from 'compression';
 import cors from 'cors';
 import express, { Application } from 'express';
 import helmet from 'helmet';
+import iocRegister from '../ioc-register';
+import Dbo from '../persistence/db/mongo-db';
 import v1Router from './routes/v1';
 
 interface AppConfig {
@@ -20,15 +22,23 @@ export default class ExpressApp {
   }
 
   start(): Application {
-    this.configApp();
+    const dbo: Dbo = iocRegister.resolve('dbo');
 
-    this.#expressApp.listen(this.#config.port, () => {
-      console.log(
-        `App running under pid ${process.pid} and listening on port: ${
-          this.#config.port
-        } in ${this.#config.mode} mode`
-      );
+    dbo.connectToServer((err: any) => {
+      if (err) {
+        console.error(err);
+        process.exit();
+      }
+
+      this.#expressApp.listen(this.#config.port, () => {
+        console.log(
+          `App running under pid ${process.pid} and listening on port: ${
+            this.#config.port
+          } in ${this.#config.mode} mode`
+        );
+      });
     });
+    this.configApp();
 
     return this.#expressApp;
   }

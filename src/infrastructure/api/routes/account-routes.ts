@@ -5,15 +5,16 @@ import app from '../../ioc-register';
 
 const accountRoutes = Router();
 
+const dbo = app.resolve('dbo');
 
 const readAccounts = app.resolve('readAccounts');
 
 const createAccountController = new CreateAccountController(
-  app.resolve('createAccount'), readAccounts
+  app.resolve('createAccount'), readAccounts, dbo
 );
 
 const readAccountController = new ReadAccountController(
-  app.resolve('readAccount'), readAccounts
+  app.resolve('readAccount'), readAccounts, dbo
 );
 
 accountRoutes.post('/', (req, res) =>

@@ -4,9 +4,10 @@ import ReadAccountsController from '../controllers/read-accounts-controller';
 
 const accountsRoutes = Router();
 
+const dbo = app.resolve('dbo');
 
 const readAccountsController = new ReadAccountsController(
-  app.resolve('readAccounts')
+  app.resolve('readAccounts'), dbo
 );
 
 accountsRoutes.get('/', (req, res) =>

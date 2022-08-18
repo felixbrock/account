@@ -12,6 +12,9 @@ import { ReadOrganizations } from '../domain/organization/read-organizations';
 
 import OrganizationRepository from './persistence/organization-repository';
 
+import Dbo from './persistence/db/mongo-db';
+
+
 const iocRegister = createContainer({ injectionMode: InjectionMode.CLASSIC });
 
 iocRegister.register({
@@ -26,6 +29,8 @@ iocRegister.register({
   accountRepository: asClass(AccountRepository),
 
   organizationRepository: asClass(OrganizationRepository),
+
+  dbo: asClass(Dbo).singleton(),
 });
 
 export default iocRegister;

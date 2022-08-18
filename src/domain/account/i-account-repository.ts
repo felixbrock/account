@@ -1,4 +1,5 @@
 import { Account } from '../entities/account';
+import { DbConnection } from '../services/i-db';
 
 export interface AccountQueryDto {
   userId?: string;
@@ -8,10 +9,11 @@ export interface AccountQueryDto {
 }
 
 export interface IAccountRepository {
-  findOne(id: string): Promise<Account | null>;
+  findOne(id: string, dbConnection: DbConnection): Promise<Account | null>;
   findBy(
-    accountQueryDto: AccountQueryDto
+    accountQueryDto: AccountQueryDto,
+    dbConnection: DbConnection
   ): Promise<Account[]>;
-  all(): Promise<Account[]>;
-  insertOne(account: Account): Promise<string>;
+  all(dbConnection: DbConnection): Promise<Account[]>;
+  insertOne(account: Account, dbConnection: DbConnection): Promise<string>;
 }

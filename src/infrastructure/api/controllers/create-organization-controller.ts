@@ -8,6 +8,7 @@ import {
   CreateOrganizationResponseDto,
 } from '../../../domain/organization/create-organization';
 import Result from '../../../domain/value-types/transient-types/result';
+import Dbo from '../../persistence/db/mongo-db';
 import {
   BaseController,
   CodeHttp,
@@ -19,13 +20,18 @@ export default class CreateOrganizationController extends BaseController {
 
   #readAccounts: ReadAccounts;
 
+  readonly #dbo: Dbo;
+
+
   constructor(
     createOrganization: CreateOrganization,
-    readAccounts: ReadAccounts
+    readAccounts: ReadAccounts,
+    dbo: Dbo
   ) {
     super();
     this.#createOrganization = createOrganization;
     this.#readAccounts = readAccounts;
+    this.#dbo = dbo;
   }
 
   #buildRequestDto = (httpRequest: Request): CreateOrganizationRequestDto => ({
@@ -50,7 +56,7 @@ export default class CreateOrganizationController extends BaseController {
       const getUserAccountInfoResult: Result<UserAccountInfo> =
         await CreateOrganizationController.getUserAccountInfo(
           jwt,
-          this.#readAccounts
+          this.#readAccounts,  this.#dbo
         );
 
       if (!getUserAccountInfoResult.success)
@@ -74,7 +80,7 @@ export default class CreateOrganizationController extends BaseController {
       );
 
       const useCaseResult: CreateOrganizationResponseDto =
-        await this.#createOrganization.execute(requestDto, authDto);
+        await this.#createOrganization.execute(requestDto, authDto, this.#dbo);
 
       if (!useCaseResult.success) {
         return CreateOrganizationController.badRequest(

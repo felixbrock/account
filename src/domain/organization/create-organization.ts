@@ -8,6 +8,7 @@ import {
   ReadOrganizationsResponseDto,
 } from './read-organizations';
 import Result from '../value-types/transient-types/result';
+import { DbConnection } from '../services/i-db';
 
 export interface CreateOrganizationRequestDto {
   name: string;
@@ -24,12 +25,15 @@ export class CreateOrganization
     IUseCase<
       CreateOrganizationRequestDto,
       CreateOrganizationResponseDto,
-      CreateOrganizationAuthDto
+      CreateOrganizationAuthDto,
+      DbConnection
     >
 {
   #organizationRepository: IOrganizationRepository;
 
   #readOrganizations: ReadOrganizations;
+
+  #dbConnection: DbConnection;
 
   constructor(
     organizationRepository: IOrganizationRepository,
@@ -41,10 +45,13 @@ export class CreateOrganization
 
   async execute(
     request: CreateOrganizationRequestDto,
-    auth: CreateOrganizationAuthDto
+    auth: CreateOrganizationAuthDto,
+    dbConnection: DbConnection
   ): Promise<CreateOrganizationResponseDto> {
     if (!auth.isAdmin)
       Promise.reject(new Error('Not authorized to perform action'));
+
+    this.#dbConnection = dbConnection;
 
     try {
       const organization: Organization = this.#createOrganization(request);
@@ -52,7 +59,8 @@ export class CreateOrganization
       const readOrganizationsResult: ReadOrganizationsResponseDto =
         await this.#readOrganizations.execute(
           { name: organization.name },
-          { isAdmin: auth.isAdmin }
+          { isAdmin: auth.isAdmin },
+          dbConnection
         );
 
       if (!readOrganizationsResult.success)
@@ -65,7 +73,8 @@ export class CreateOrganization
         );
 
       const insertResult = await this.#organizationRepository.insertOne(
-        organization
+        organization,
+        this.#dbConnection
       );
 
       return Result.ok(insertResult);

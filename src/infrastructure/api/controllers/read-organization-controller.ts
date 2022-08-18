@@ -8,6 +8,7 @@ import {
   ReadOrganizationResponseDto,
 } from '../../../domain/organization/read-organization';
 import Result from '../../../domain/value-types/transient-types/result';
+import Dbo from '../../persistence/db/mongo-db';
 import {
   BaseController,
   CodeHttp,
@@ -19,10 +20,17 @@ export default class ReadOrganizationController extends BaseController {
 
   #readAccounts: ReadAccounts;
 
-  constructor(readOrganization: ReadOrganization, readAccounts: ReadAccounts) {
+  readonly #dbo: Dbo;
+
+  constructor(
+    readOrganization: ReadOrganization,
+    readAccounts: ReadAccounts,
+    dbo: Dbo
+  ) {
     super();
     this.#readOrganization = readOrganization;
     this.#readAccounts = readAccounts;
+    this.#dbo = dbo;
   }
 
   #buildRequestDto = (httpRequest: Request): ReadOrganizationRequestDto => ({
@@ -33,7 +41,7 @@ export default class ReadOrganizationController extends BaseController {
     userAccountInfo: UserAccountInfo
   ): ReadOrganizationAuthDto => {
     if (!userAccountInfo.callerOrganizationId) throw new Error('Unauthorized');
-    
+
     return {
       callerOrganizationId: userAccountInfo.callerOrganizationId,
       isAdmin: userAccountInfo.isAdmin,
@@ -52,7 +60,7 @@ export default class ReadOrganizationController extends BaseController {
       const getUserAccountInfoResult: Result<UserAccountInfo> =
         await ReadOrganizationController.getUserAccountInfo(
           jwt,
-          this.#readAccounts
+          this.#readAccounts, this.#dbo
         );
 
       if (!getUserAccountInfoResult.success)
@@ -69,7 +77,7 @@ export default class ReadOrganizationController extends BaseController {
       );
 
       const useCaseResult: ReadOrganizationResponseDto =
-        await this.#readOrganization.execute(requestDto, authDto);
+        await this.#readOrganization.execute(requestDto, authDto, this.#dbo);
 
       if (!useCaseResult.success) {
         return ReadOrganizationController.badRequest(res, useCaseResult.error);

@@ -3,6 +3,7 @@ import IUseCase from '../services/use-case';
 import { IAccountRepository, AccountQueryDto } from './i-account-repository';
 import { AccountDto, buildAccountDto } from './account-dto';
 import Result from '../value-types/transient-types/result';
+import { DbConnection } from '../services/i-db';
 
 export interface ReadAccountsRequestDto {
   modifiedOnStart?: number;
@@ -20,10 +21,13 @@ export class ReadAccounts
     IUseCase<
       ReadAccountsRequestDto,
       ReadAccountsResponseDto,
-      ReadAccountsAuthDto
+      ReadAccountsAuthDto,
+      DbConnection
     >
 {
   #accountRepository: IAccountRepository;
+
+  #dbConnection: DbConnection;
 
   constructor(accountRepository: IAccountRepository) {
     this.#accountRepository = accountRepository;
@@ -31,11 +35,15 @@ export class ReadAccounts
 
   async execute(
     request: ReadAccountsRequestDto,
-    auth: ReadAccountsAuthDto
+    auth: ReadAccountsAuthDto,
+    dbConnection: DbConnection
   ): Promise<ReadAccountsResponseDto> {
     try {
+      this.#dbConnection = dbConnection;
+
       const accounts: Account[] = await this.#accountRepository.findBy(
-        this.#buildAccountQueryDto(request, auth)
+        this.#buildAccountQueryDto(request, auth),
+        this.#dbConnection
       );
       if (!accounts) throw new Error(`Queried accounts do not exist`);
 

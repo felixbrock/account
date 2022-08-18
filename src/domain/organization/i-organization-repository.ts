@@ -1,4 +1,5 @@
 import { Organization } from '../entities/organization';
+import { DbConnection } from '../services/i-db';
 
 export interface OrganizationQueryDto {
   name?: string;
@@ -7,10 +8,14 @@ export interface OrganizationQueryDto {
 }
 
 export interface IOrganizationRepository {
-  findOne(id: string): Promise<Organization | null>;
+  findOne(id: string, dbConnection: DbConnection): Promise<Organization | null>;
   findBy(
-    organizationQueryDto: OrganizationQueryDto
+    organizationQueryDto: OrganizationQueryDto,
+    dbConnection: DbConnection
   ): Promise<Organization[]>;
-  all(): Promise<Organization[]>;
-  insertOne(organization: Organization): Promise<string>;
+  all(dbConnection: DbConnection): Promise<Organization[]>;
+  insertOne(
+    organization: Organization,
+    dbConnection: DbConnection
+  ): Promise<string>;
 }

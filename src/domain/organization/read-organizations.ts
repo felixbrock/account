@@ -1,4 +1,5 @@
 import { Organization } from '../entities/organization';
+import { DbConnection } from '../services/i-db';
 import IUseCase from '../services/use-case';
 import Result from '../value-types/transient-types/result';
 import {
@@ -24,10 +25,13 @@ export class ReadOrganizations
     IUseCase<
       ReadOrganizationsRequestDto,
       ReadOrganizationsResponseDto,
-      ReadOrganizationsAuthDto
+      ReadOrganizationsAuthDto,
+      DbConnection
     >
 {
   #organizationRepository: IOrganizationRepository;
+
+  #dbConnection: DbConnection;
 
   constructor(organizationRepository: IOrganizationRepository) {
     this.#organizationRepository = organizationRepository;
@@ -35,14 +39,18 @@ export class ReadOrganizations
 
   async execute(
     request: ReadOrganizationsRequestDto,
-    auth: ReadOrganizationsAuthDto
+    auth: ReadOrganizationsAuthDto,
+    dbConnection: DbConnection
   ): Promise<ReadOrganizationsResponseDto> {
+
+    this.#dbConnection = dbConnection; 
+
     try {
       if (!auth.isAdmin) throw new Error('Not authorized to perform action');
 
       const organizations: Organization[] =
         await this.#organizationRepository.findBy(
-          this.#buildOrganizationQueryDto(request)
+          this.#buildOrganizationQueryDto(request), dbConnection
         );
       if (!organizations) throw new Error(`Queried organizations do not exist`);
 

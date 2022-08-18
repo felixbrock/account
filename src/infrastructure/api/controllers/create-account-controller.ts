@@ -8,6 +8,7 @@ import {
 } from '../../../domain/account/create-account';
 import { ReadAccounts } from '../../../domain/account/read-accounts';
 import Result from '../../../domain/value-types/transient-types/result';
+import Dbo from '../../persistence/db/mongo-db';
 import {
   BaseController,
   CodeHttp,
@@ -19,10 +20,13 @@ export default class CreateAccountController extends BaseController {
 
   #readAccounts: ReadAccounts;
 
-  constructor(createAccount: CreateAccount, readAccounts: ReadAccounts) {
+  readonly #dbo: Dbo;
+
+  constructor(createAccount: CreateAccount, readAccounts: ReadAccounts, dbo: Dbo) {
     super();
     this.#createAccount = createAccount;
     this.#readAccounts = readAccounts;
+    this.#dbo = dbo;
   }
 
   #buildRequestDto = (httpRequest: Request): CreateAccountRequestDto => ({
@@ -46,7 +50,7 @@ export default class CreateAccountController extends BaseController {
       const getUserAccountInfoResult: Result<UserAccountInfo> =
         await CreateAccountController.getUserAccountInfo(
           jwt,
-          this.#readAccounts
+          this.#readAccounts, this.#dbo
         );
 
       if (!getUserAccountInfoResult.success)
@@ -66,7 +70,7 @@ export default class CreateAccountController extends BaseController {
       );
 
       const useCaseResult: CreateAccountResponseDto =
-        await this.#createAccount.execute(requestDto, authDto);
+        await this.#createAccount.execute(requestDto, authDto, this.#dbo);
 
       if (!useCaseResult.success) {
         return CreateAccountController.badRequest(res, useCaseResult.error);

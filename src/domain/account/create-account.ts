@@ -7,6 +7,7 @@ import { IOrganizationRepository } from '../organization/i-organization-reposito
 import { Organization } from '../entities/organization';
 import { ReadAccounts, ReadAccountsResponseDto } from './read-accounts';
 import Result from '../value-types/transient-types/result';
+import { DbConnection } from '../services/i-db';
 
 export interface CreateAccountRequestDto {
   userId: string;
@@ -24,7 +25,8 @@ export class CreateAccount
     IUseCase<
       CreateAccountRequestDto,
       CreateAccountResponseDto,
-      CreateAccountAuthDto
+      CreateAccountAuthDto,
+      DbConnection
     >
 {
   #accountRepository: IAccountRepository;
@@ -33,10 +35,12 @@ export class CreateAccount
 
   #readAccounts: ReadAccounts;
 
+  #dbConnection: DbConnection;
+
   constructor(
     accountRepository: IAccountRepository,
     organizationRepository: IOrganizationRepository,
-    readAccounts: ReadAccounts
+    readAccounts: ReadAccounts,
   ) {
     this.#accountRepository = accountRepository;
     this.#organizationRepository = organizationRepository;
@@ -45,8 +49,12 @@ export class CreateAccount
 
   async execute(
     request: CreateAccountRequestDto,
-    auth: CreateAccountAuthDto
+    auth: CreateAccountAuthDto,
+    dbConnection: DbConnection
   ): Promise<CreateAccountResponseDto> {
+
+    this.#dbConnection = dbConnection;
+
     if (!auth.isAdmin)
       return Promise.reject(new Error('Not authorized to perform action'));
 
@@ -56,7 +64,8 @@ export class CreateAccount
       await this.#requestIsValid(createResult);
 
       const insertResult = await this.#accountRepository.insertOne(
-        createResult
+        createResult,
+        this.#dbConnection
       );
 
       return Result.ok(insertResult);
@@ -69,7 +78,7 @@ export class CreateAccount
 
   #requestIsValid = async (account: Account): Promise<boolean> => {
     const readAccountsResult: ReadAccountsResponseDto =
-      await this.#readAccounts.execute({}, { userId: account.userId });
+      await this.#readAccounts.execute({}, { userId: account.userId }, this.#dbConnection);
 
     if (!readAccountsResult.success) throw new Error('Reading accounts failed');
     if (readAccountsResult.value && readAccountsResult.value.length)
@@ -78,7 +87,7 @@ export class CreateAccount
       );
 
     const readOrganizationResult: Organization | null =
-      await this.#organizationRepository.findOne(account.organizationId);
+      await this.#organizationRepository.findOne(account.organizationId, this.#dbConnection);
 
     if (!readOrganizationResult)
       return Promise.reject(

@@ -1,11 +1,10 @@
-import { Document, FindCursor, InsertOneResult, ObjectId } from 'mongodb';
+import { Db, Document, FindCursor, InsertOneResult, ObjectId } from 'mongodb';
 import sanitize from 'mongo-sanitize';
 import { Account, AccountProperties } from '../../domain/entities/account';
 import {
   AccountQueryDto,
   IAccountRepository,
 } from '../../domain/account/i-account-repository';
-import { close, connect, createClient } from './db/mongo-db';
 
 interface AccountPersistence {
   _id: string;
@@ -23,15 +22,14 @@ interface AccountQueryFilter {
 const collectionName = 'accounts';
 
 export default class AccountRepositoryImpl implements IAccountRepository {
-  public findOne = async (id: string): Promise<Account | null> => {
-    const client = createClient();
+  public findOne = async (
+    id: string,
+    dbConnection: Db
+  ): Promise<Account | null> => {
     try {
-      const db = await connect(client);
-      const result: any = await db
+      const result: any = await dbConnection
         .collection(collectionName)
         .findOne({ _id: new ObjectId(sanitize(id)) });
-
-      close(client);
 
       if (!result) return null;
 
@@ -44,19 +42,17 @@ export default class AccountRepositoryImpl implements IAccountRepository {
   };
 
   public findBy = async (
-    accountQueryDto: AccountQueryDto
+    accountQueryDto: AccountQueryDto,
+    dbConnection: Db
   ): Promise<Account[]> => {
     try {
-      if (!Object.keys(accountQueryDto).length) return await this.all();
+      if (!Object.keys(accountQueryDto).length)
+        return await this.all(dbConnection);
 
-      const client = createClient();
-      const db = await connect(client);
-      const result: FindCursor = await db
+      const result: FindCursor = await dbConnection
         .collection(collectionName)
         .find(this.#buildFilter(sanitize(accountQueryDto)));
       const results = await result.toArray();
-
-      close(client);
 
       if (!results || !results.length) return [];
 
@@ -89,14 +85,12 @@ export default class AccountRepositoryImpl implements IAccountRepository {
     return filter;
   };
 
-  public all = async (): Promise<Account[]> => {
-    const client = createClient();
+  public all = async (dbConnection: Db): Promise<Account[]> => {
     try {
-      const db = await connect(client);
-      const result: FindCursor = await db.collection(collectionName).find();
+      const result: FindCursor = await dbConnection
+        .collection(collectionName)
+        .find();
       const results = await result.toArray();
-
-      close(client);
 
       if (!results || !results.length) return [];
 
@@ -110,18 +104,17 @@ export default class AccountRepositoryImpl implements IAccountRepository {
     }
   };
 
-  public insertOne = async (account: Account): Promise<string> => {
-    const client = createClient();
+  public insertOne = async (
+    account: Account,
+    dbConnection: Db
+  ): Promise<string> => {
     try {
-      const db = await connect(client);
-      const result: InsertOneResult<Document> = await db
+      const result: InsertOneResult<Document> = await dbConnection
         .collection(collectionName)
         .insertOne(this.#toPersistence(sanitize(account)));
 
       if (!result.acknowledged)
         throw new Error('Account creation failed. Insert not acknowledged');
-
-      close(client);
 
       return result.insertedId.toHexString();
     } catch (error: unknown) {

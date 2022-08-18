@@ -1,4 +1,5 @@
 import { Organization } from '../entities/organization';
+import { DbConnection } from '../services/i-db';
 import IUseCase from '../services/use-case';
 import Result from '../value-types/transient-types/result';
 import { IOrganizationRepository } from './i-organization-repository';
@@ -20,10 +21,13 @@ export class ReadOrganization
     IUseCase<
       ReadOrganizationRequestDto,
       ReadOrganizationResponseDto,
-      ReadOrganizationAuthDto
+      ReadOrganizationAuthDto,
+      DbConnection
     >
 {
   #organizationRepository: IOrganizationRepository;
+
+  #dbConnection: DbConnection;
 
   constructor(organizationRepository: IOrganizationRepository) {
     this.#organizationRepository = organizationRepository;
@@ -31,14 +35,23 @@ export class ReadOrganization
 
   async execute(
     request: ReadOrganizationRequestDto,
-    auth: ReadOrganizationAuthDto
+    auth: ReadOrganizationAuthDto,
+    dbConnection: DbConnection
   ): Promise<ReadOrganizationResponseDto> {
+    this.#dbConnection = dbConnection;
+
     try {
-      if (request.targetOrganizationId !== auth.callerOrganizationId && !auth.isAdmin)
-      throw new Error('Not authorized to perform action');
+      if (
+        request.targetOrganizationId !== auth.callerOrganizationId &&
+        !auth.isAdmin
+      )
+        throw new Error('Not authorized to perform action');
 
       const organization: Organization | null =
-        await this.#organizationRepository.findOne(request.targetOrganizationId);
+        await this.#organizationRepository.findOne(
+          request.targetOrganizationId,
+          this.#dbConnection
+        );
       if (!organization)
         throw new Error(
           `Organization with id ${request.targetOrganizationId} does not exist`
@@ -46,8 +59,8 @@ export class ReadOrganization
 
       return Result.ok(buildOrganizationDto(organization));
     } catch (error: unknown) {
-      if(typeof error === 'string') return Result.fail(error);
-      if(error instanceof Error) return Result.fail(error.message);
+      if (typeof error === 'string') return Result.fail(error);
+      if (error instanceof Error) return Result.fail(error.message);
       return Result.fail('Unknown error occured');
     }
   }
