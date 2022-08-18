@@ -1,3 +1,7 @@
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 const nodeEnv = process.env.NODE_ENV || 'development';
 const defaultPort = 8081;
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : defaultPort;
