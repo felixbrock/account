@@ -1,7 +1,4 @@
-org: cuddlymarmot
-console: true
 service: account-service
-
 useDotenv: true
 
 provider:

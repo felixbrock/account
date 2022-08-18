@@ -10,8 +10,8 @@
     "clean": "rimraf dist",
     "build": "npm run clean && npm run tsc",
     "start": "npm run build && nodemon ./src/index.ts",
-    "deploy": "npm run build && serverless deploy",
-    "deployment-invoke": "serverless invoke",
+    "deploy": "npm run build && serverless deploy && npm run write-env ",
+    "write-env": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./write-env.ps1 -functionName account-service-production-app",
     "debug": "npm run build && nodemon --inspect=3015 ./src/index.ts"
   },
   "repository": {
