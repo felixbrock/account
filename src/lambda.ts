@@ -1,11 +1,26 @@
-// eslint-disable-next-line import/first
-import serverlessExpress from 'serverless-http';
-// eslint-disable-next-line import/first
+import serverlessExpress from '@vendia/serverless-express';
+import { Application } from 'express';
 import ExpressApp from './infrastructure/api/express-app';
-// eslint-disable-next-line import/first
-import {appConfig} from './config';
+import { appConfig } from './config';
 
+let serverlessExpressInstance: any;
 
-const expressApp = new ExpressApp(appConfig.express);
+const asyncTask = (): Promise<Application> => {
+  const expressApp = new ExpressApp(appConfig.express);
 
-module.exports.handler = serverlessExpress(expressApp.start());
+  return expressApp.start(false);
+};
+
+const setup = async (event: any, context: any): Promise<any> => {
+  const app = await asyncTask();
+  serverlessExpressInstance = serverlessExpress({ app });
+  return serverlessExpressInstance(event, context);
+};
+
+// eslint-disable-next-line import/prefer-default-export
+export const handler = (event: any, context: any): any => {
+  if (serverlessExpressInstance)
+    return serverlessExpressInstance(event, context);
+
+  return setup(event, context);
+};

@@ -21,26 +21,27 @@ export default class ExpressApp {
     this.#config = config;
   }
 
-  start(): Application {
+  async start(runningLocal: boolean): Promise<Application> {
     const dbo: Dbo = iocRegister.resolve('dbo');
 
-    dbo.connectToServer((err: any) => {
-      if (err) {
-        console.error(err);
-        process.exit();
-      }
+    try {
+      await dbo.connectToServer();
 
-      this.#expressApp.listen(this.#config.port, () => {
-        console.log(
-          `App running under pid ${process.pid} and listening on port: ${
-            this.#config.port
-          } in ${this.#config.mode} mode`
-        );
-      });
-    });
-    this.configApp();
+      this.configApp();
 
-    return this.#expressApp;
+      if (runningLocal)
+        this.#expressApp.listen(this.#config.port, () => {
+          console.log(
+            `App running under pid ${process.pid} and listening on port: ${
+              this.#config.port
+            } in ${this.#config.mode} mode`
+          );
+        });
+
+      return this.#expressApp;
+    } catch (error: any) {
+      throw new Error(error);
+    }
   }
 
   private configApp(): void {
