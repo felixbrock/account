@@ -1,3 +1,7 @@
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 const nodeEnv = process.env.NODE_ENV || 'development';
 const defaultPort = 8081;
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : defaultPort;
@@ -25,24 +29,21 @@ const getMongodbConfig = (): MongoDbConfig => {
   switch (nodeEnv) {
     case 'development':
       return {
-        url: process.env.DATABASE_DEV_URL || '',
-        dbName: process.env.DATABASE_DEV_NAME || '',
+        url: process.env.DATABASE_URL_DEV || '',
+        dbName: process.env.DATABASE_NAME_DEV || '',
       };
     case 'test':
       return {
-        url: process.env.DATABASE_TEST_URL || '',
-        dbName: process.env.DATABASE_TEST_NAME || '',
+        url: process.env.DATABASE_URL_STAGING || '',
+        dbName: process.env.DATABASE_NAME_STAGING || '',
       };
     case 'production':
       return {
-        url: process.env.DATABASE_URL || '',
-        dbName: process.env.DATABASE_NAME || '',
+        url: process.env.DATABASE_URL_PROD || '',
+        dbName: process.env.DATABASE_NAME_PROD || '',
       };
     default:
-      return {
-        url: '',
-        dbName: '',
-      };
+      throw new Error('Node environment mismatch');
   }
 };
 

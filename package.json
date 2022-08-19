@@ -10,7 +10,8 @@
     "clean": "rimraf dist",
     "build": "npm run clean && npm run tsc",
     "start": "npm run build && nodemon ./src/index.ts",
-    "deploy": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./deploy.ps1 -serviceName account",
+    "deploy": "npm run build && serverless deploy && npm run write-env ",
+    "write-env": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./write-env.ps1 -functionName account-service-production-app",
     "debug": "npm run build && nodemon --inspect=3015 ./src/index.ts"
   },
   "repository": {
@@ -40,6 +41,7 @@
     "eslint-plugin-import": "^2.22.1",
     "nodemon": "^2.0.13",
     "prettier": "2.3.2",
+    "serverless": "^3.22.0",
     "ts-node": "^10.2.1",
     "typescript": "^4.3.5"
   },
@@ -54,6 +56,7 @@
     "jsonwebtoken": "^8.5.1",
     "jwks-rsa": "^2.1.4",
     "mongo-sanitize": "^1.1.0",
-    "mongodb": "^4.1.0"
+    "mongodb": "^4.1.0",
+    "serverless-http": "^3.0.2"
   }
 }

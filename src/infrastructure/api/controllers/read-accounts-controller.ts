@@ -109,7 +109,7 @@ export default class ReadAccountsController extends BaseController {
       const getUserAccountInfoResult: Result<UserAccountInfo> =
         await ReadAccountsController.getUserAccountInfo(
           jwt,
-          this.#readAccounts, this.#dbo
+          this.#readAccounts, this.#dbo.dbConnection
         );
 
       if (!getUserAccountInfoResult.success)
@@ -127,7 +127,7 @@ export default class ReadAccountsController extends BaseController {
       const authDto: ReadAccountsAuthDto = this.#buildAuthDto(userAccountInfo);
 
       const useCaseResult: ReadAccountsResponseDto =
-        await this.#readAccounts.execute(buildDtoResult, authDto, this.#dbo);
+        await this.#readAccounts.execute(buildDtoResult, authDto, this.#dbo.dbConnection);
 
       if (!useCaseResult.success) {
         return ReadAccountsController.badRequest(res, useCaseResult.error);

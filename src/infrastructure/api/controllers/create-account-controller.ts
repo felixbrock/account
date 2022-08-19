@@ -50,7 +50,7 @@ export default class CreateAccountController extends BaseController {
       const getUserAccountInfoResult: Result<UserAccountInfo> =
         await CreateAccountController.getUserAccountInfo(
           jwt,
-          this.#readAccounts, this.#dbo
+          this.#readAccounts, this.#dbo.dbConnection
         );
 
       if (!getUserAccountInfoResult.success)
@@ -70,7 +70,7 @@ export default class CreateAccountController extends BaseController {
       );
 
       const useCaseResult: CreateAccountResponseDto =
-        await this.#createAccount.execute(requestDto, authDto, this.#dbo);
+        await this.#createAccount.execute(requestDto, authDto, this.#dbo.dbConnection);
 
       if (!useCaseResult.success) {
         return CreateAccountController.badRequest(res, useCaseResult.error);
