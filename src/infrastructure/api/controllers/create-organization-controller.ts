@@ -56,7 +56,7 @@ export default class CreateOrganizationController extends BaseController {
       const getUserAccountInfoResult: Result<UserAccountInfo> =
         await CreateOrganizationController.getUserAccountInfo(
           jwt,
-          this.#readAccounts,  this.#dbo
+          this.#readAccounts,  this.#dbo.dbConnection
         );
 
       if (!getUserAccountInfoResult.success)
@@ -80,7 +80,7 @@ export default class CreateOrganizationController extends BaseController {
       );
 
       const useCaseResult: CreateOrganizationResponseDto =
-        await this.#createOrganization.execute(requestDto, authDto, this.#dbo);
+        await this.#createOrganization.execute(requestDto, authDto, this.#dbo.dbConnection);
 
       if (!useCaseResult.success) {
         return CreateOrganizationController.badRequest(

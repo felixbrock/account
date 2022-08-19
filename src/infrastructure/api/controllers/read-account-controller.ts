@@ -52,7 +52,7 @@ export default class ReadAccountController extends BaseController {
       const jwt = authHeader.split(' ')[1];
 
       const getUserAccountInfoResult: Result<UserAccountInfo> =
-        await ReadAccountController.getUserAccountInfo(jwt, this.#readAccounts,  this.#dbo);
+        await ReadAccountController.getUserAccountInfo(jwt, this.#readAccounts,  this.#dbo.dbConnection);
 
       if (!getUserAccountInfoResult.success)
         return ReadAccountController.unauthorized(
@@ -69,7 +69,7 @@ export default class ReadAccountController extends BaseController {
       );
 
       const useCaseResult: ReadAccountResponseDto =
-        await this.#readAccount.execute(requestDto, authDto, this.#dbo);
+        await this.#readAccount.execute(requestDto, authDto, this.#dbo.dbConnection);
 
       if (!useCaseResult.success) {
         return ReadAccountController.badRequest(res, useCaseResult.error);

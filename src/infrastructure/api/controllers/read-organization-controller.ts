@@ -60,7 +60,7 @@ export default class ReadOrganizationController extends BaseController {
       const getUserAccountInfoResult: Result<UserAccountInfo> =
         await ReadOrganizationController.getUserAccountInfo(
           jwt,
-          this.#readAccounts, this.#dbo
+          this.#readAccounts, this.#dbo.dbConnection
         );
 
       if (!getUserAccountInfoResult.success)
@@ -77,7 +77,7 @@ export default class ReadOrganizationController extends BaseController {
       );
 
       const useCaseResult: ReadOrganizationResponseDto =
-        await this.#readOrganization.execute(requestDto, authDto, this.#dbo);
+        await this.#readOrganization.execute(requestDto, authDto, this.#dbo.dbConnection);
 
       if (!useCaseResult.success) {
         return ReadOrganizationController.badRequest(res, useCaseResult.error);
