@@ -2,28 +2,22 @@ import { Db, MongoClient, ServerApiVersion } from 'mongodb';
 import { appConfig } from '../../../config';
 
 export default class Dbo {
-	#client = new MongoClient(appConfig.mongodb.url, {
-		serverApi: ServerApiVersion.v1,
-	});
-	
-	#dbConnection: Db | undefined;
+  #client = new MongoClient(appConfig.mongodb.url, {
+    serverApi: ServerApiVersion.v1,
+  });
 
-	get dbConnection(): Db {
-		if(!this.#dbConnection) throw Error('Undefined db connection. Please connect to server first');
-		return this.#dbConnection;
-	}
+  #dbConnection: Db | undefined;
 
-	connectToServer = (callback: (err?: unknown) => unknown): any => {
-    this.#client.connect((err, db) =>  {
-      if (err || !db) {
-        return callback(err);
-      }
+  get dbConnection(): Db {
+    if (!this.#dbConnection)
+      throw Error('Undefined db connection. Please connect to server first');
+    return this.#dbConnection;
+  }
 
-      this.#dbConnection = db.db(appConfig.mongodb.dbName);
-      console.log('Successfully connected to MongoDB.');
+  connectToServer = async (): Promise<void> => {
+    const db = await this.#client.connect();
 
-      return callback();
-    });
+    this.#dbConnection = db.db(appConfig.mongodb.dbName);
+    console.log('Successfully connected to MongoDB.');
   };
-
-};
+}
