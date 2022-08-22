@@ -6,12 +6,12 @@ import Result from '../value-types/transient-types/result';
 import { DbConnection } from '../services/i-db';
 
 export interface ReadAccountRequestDto {
-  accountId: string;
+  targetAccountId: string;
 }
 
 export interface ReadAccountAuthDto {
-  accountId: string;
-  isAdmin: boolean;
+  callerAccountId?: string;
+  isSystemInternal: boolean;
 }
 
 export type ReadAccountResponseDto = Result<AccountDto>;
@@ -36,15 +36,15 @@ export class ReadAccount
     try {
     this.#dbConnection = dbConnection;
 
-      if (request.accountId !== auth.accountId && !auth.isAdmin)
+      if (auth.callerAccountId && request.targetAccountId !== auth.callerAccountId && !auth.isSystemInternal)
         throw new Error('Not authorized to perform action');
 
       const account: Account | null = await this.#accountRepository.findOne(
-        request.accountId,
+        request.targetAccountId,
         this.#dbConnection
       );
       if (!account)
-        throw new Error(`Account with id ${request.accountId} does not exist`);
+        throw new Error(`Account with id ${request.targetAccountId} does not exist`);
 
       return Result.ok(buildAccountDto(account));
     } catch (error: unknown) {

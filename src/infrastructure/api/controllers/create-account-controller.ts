@@ -35,7 +35,7 @@ export default class CreateAccountController extends BaseController {
   });
 
   #buildAuthDto = (userAccountInfo: UserAccountInfo): CreateAccountAuthDto => ({
-    isAdmin: userAccountInfo.isAdmin,
+    isSystemInternal: userAccountInfo.isSystemInternal,
   });
 
   protected async executeImpl(req: Request, res: Response): Promise<Response> {
@@ -61,7 +61,7 @@ export default class CreateAccountController extends BaseController {
       if (!getUserAccountInfoResult.value)
         throw new Error('Authorization failed');
 
-      if(!getUserAccountInfoResult.value.isAdmin)
+      if(!getUserAccountInfoResult.value.isSystemInternal)
           return CreateAccountController.unauthorized(res, 'Not authorized to perform action');
 
       const requestDto: CreateAccountRequestDto = this.#buildRequestDto(req);

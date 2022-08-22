@@ -41,7 +41,7 @@ export default class CreateOrganizationController extends BaseController {
   #buildAuthDto = (
     userAccountInfo: UserAccountInfo
   ): CreateOrganizationAuthDto => ({
-    isAdmin: userAccountInfo.isAdmin,
+    isSystemInternal: userAccountInfo.isSystemInternal,
   });
 
   protected async executeImpl(req: Request, res: Response): Promise<Response> {
@@ -67,7 +67,7 @@ export default class CreateOrganizationController extends BaseController {
       if (!getUserAccountInfoResult.value)
         throw new Error('Authorization failed');
 
-      if (!getUserAccountInfoResult.value.isAdmin)
+      if (!getUserAccountInfoResult.value.isSystemInternal)
         return CreateOrganizationController.unauthorized(
           res,
           'Not authorized to perform action'

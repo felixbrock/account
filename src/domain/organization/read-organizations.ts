@@ -15,7 +15,7 @@ export interface ReadOrganizationsRequestDto {
 }
 
 export interface ReadOrganizationsAuthDto {
-  isAdmin: boolean;
+  isSystemInternal: boolean;
 }
 
 export type ReadOrganizationsResponseDto = Result<OrganizationDto[]>;
@@ -46,7 +46,7 @@ export class ReadOrganizations
     this.#dbConnection = dbConnection; 
 
     try {
-      if (!auth.isAdmin) throw new Error('Not authorized to perform action');
+      if (!auth.isSystemInternal) throw new Error('Not authorized to perform action');
 
       const organizations: Organization[] =
         await this.#organizationRepository.findBy(

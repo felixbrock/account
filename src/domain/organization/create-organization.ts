@@ -15,7 +15,7 @@ export interface CreateOrganizationRequestDto {
 }
 
 export interface CreateOrganizationAuthDto {
-  isAdmin: boolean;
+  isSystemInternal: boolean;
 }
 
 export type CreateOrganizationResponseDto = Result<string>;
@@ -48,7 +48,7 @@ export class CreateOrganization
     auth: CreateOrganizationAuthDto,
     dbConnection: DbConnection
   ): Promise<CreateOrganizationResponseDto> {
-    if (!auth.isAdmin)
+    if (!auth.isSystemInternal)
       Promise.reject(new Error('Not authorized to perform action'));
 
     this.#dbConnection = dbConnection;
@@ -59,7 +59,7 @@ export class CreateOrganization
       const readOrganizationsResult: ReadOrganizationsResponseDto =
         await this.#readOrganizations.execute(
           { name: organization.name },
-          { isAdmin: auth.isAdmin },
+          { isSystemInternal: auth.isSystemInternal },
           dbConnection
         );
 

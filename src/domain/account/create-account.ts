@@ -15,7 +15,7 @@ export interface CreateAccountRequestDto {
 }
 
 export interface CreateAccountAuthDto {
-  isAdmin: boolean;
+  isSystemInternal: boolean;
 }
 
 export type CreateAccountResponseDto = Result<string>;
@@ -55,7 +55,7 @@ export class CreateAccount
 
     this.#dbConnection = dbConnection;
 
-    if (!auth.isAdmin)
+    if (!auth.isSystemInternal)
       return Promise.reject(new Error('Not authorized to perform action'));
 
     try {

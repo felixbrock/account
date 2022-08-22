@@ -44,7 +44,7 @@ export default class ReadOrganizationController extends BaseController {
 
     return {
       callerOrganizationId: userAccountInfo.callerOrganizationId,
-      isAdmin: userAccountInfo.isAdmin,
+      isSystemInternal: userAccountInfo.isSystemInternal,
     };
   };
 

@@ -10,8 +10,8 @@ export interface ReadOrganizationRequestDto {
 }
 
 export interface ReadOrganizationAuthDto {
-  callerOrganizationId: string;
-  isAdmin: boolean;
+  callerOrganizationId?: string;
+  isSystemInternal: boolean;
 }
 
 export type ReadOrganizationResponseDto = Result<OrganizationDto>;
@@ -42,8 +42,8 @@ export class ReadOrganization
 
     try {
       if (
-        request.targetOrganizationId !== auth.callerOrganizationId &&
-        !auth.isAdmin
+        auth.callerOrganizationId && request.targetOrganizationId !== auth.callerOrganizationId &&
+        !auth.isSystemInternal
       )
         throw new Error('Not authorized to perform action');
 

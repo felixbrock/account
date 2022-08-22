@@ -30,15 +30,15 @@ export default class ReadAccountController extends BaseController {
   }
 
   #buildRequestDto = (httpRequest: Request): ReadAccountRequestDto => ({
-    accountId: httpRequest.params.accountId,
+    targetAccountId: httpRequest.params.accountId,
   });
 
   #buildAuthDto = (userAccountInfo: UserAccountInfo): ReadAccountAuthDto => {
     if (!userAccountInfo.accountId) throw new Error('Unauthorized');
 
     return {
-      accountId: userAccountInfo.accountId,
-      isAdmin: userAccountInfo.isAdmin,
+      callerAccountId: userAccountInfo.accountId,
+      isSystemInternal: userAccountInfo.isSystemInternal,
     };
   };
 
