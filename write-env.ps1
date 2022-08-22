@@ -23,8 +23,8 @@ $envVariables.PSObject.Properties | ForEach-Object {
 
 }
 
-get-content .env | foreach {
-  $envValues = Add-EnvValue -base $envValues -new $_
+get-content .env | ForEach-Object {
+  if($_) {$envValues = Add-EnvValue -base $envValues -new $_}
 
 }
 
