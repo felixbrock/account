@@ -82,6 +82,7 @@ export default class CreateAccountController extends BaseController {
         CodeHttp.CREATED
       );
     } catch (error: unknown) {
+      console.error(error);
       if(typeof error === 'string') return CreateAccountController.fail(res, error);
       if(error instanceof Error) return CreateAccountController.fail(res, error);
       return CreateAccountController.fail(res,'Unknown error occured');

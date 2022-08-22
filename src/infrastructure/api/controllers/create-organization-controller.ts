@@ -95,6 +95,7 @@ export default class CreateOrganizationController extends BaseController {
         CodeHttp.CREATED
       );
     } catch (error: unknown) {
+      console.error(error);
       if (typeof error === 'string')
         return CreateOrganizationController.fail(res, error);
       if (error instanceof Error)

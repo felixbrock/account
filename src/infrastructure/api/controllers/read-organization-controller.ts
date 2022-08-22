@@ -89,6 +89,7 @@ export default class ReadOrganizationController extends BaseController {
         CodeHttp.OK
       );
     } catch (error: unknown) {
+      console.error(error);
       if (typeof error === 'string')
         return ReadOrganizationController.fail(res, error);
       if (error instanceof Error)

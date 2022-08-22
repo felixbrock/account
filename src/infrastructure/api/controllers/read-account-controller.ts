@@ -77,6 +77,7 @@ export default class ReadAccountController extends BaseController {
 
       return ReadAccountController.ok(res, useCaseResult.value, CodeHttp.OK);
     } catch (error: unknown) {
+      console.error(error);
       if (typeof error === 'string')
         return ReadAccountController.fail(res, error);
       if (error instanceof Error) return ReadAccountController.fail(res, error);
