@@ -10,7 +10,7 @@ import Result from '../value-types/transient-types/result';
 import { DbConnection } from '../services/i-db';
 
 export interface CreateAccountRequestDto {
-  userId: string;
+  targetUserId: string;
   targetOrganizationId: string;
 }
 
@@ -40,7 +40,7 @@ export class CreateAccount
   constructor(
     accountRepository: IAccountRepository,
     organizationRepository: IOrganizationRepository,
-    readAccounts: ReadAccounts,
+    readAccounts: ReadAccounts
   ) {
     this.#accountRepository = accountRepository;
     this.#organizationRepository = organizationRepository;
@@ -52,7 +52,6 @@ export class CreateAccount
     auth: CreateAccountAuthDto,
     dbConnection: DbConnection
   ): Promise<CreateAccountResponseDto> {
-
     this.#dbConnection = dbConnection;
 
     if (!auth.isSystemInternal)
@@ -76,9 +75,15 @@ export class CreateAccount
     }
   }
 
-  #requestIsValid = async (account: Account): Promise<boolean> => {
+  #requestIsValid = async (
+    account: Account,
+  ): Promise<boolean> => {
     const readAccountsResult: ReadAccountsResponseDto =
-      await this.#readAccounts.execute({}, { userId: account.userId }, this.#dbConnection);
+      await this.#readAccounts.execute(
+        { targetUserId: account.userId },
+        { isSystemInternal: true },
+        this.#dbConnection
+      );
 
     if (!readAccountsResult.success) throw new Error('Reading accounts failed');
     if (readAccountsResult.value && readAccountsResult.value.length)
@@ -87,7 +92,10 @@ export class CreateAccount
       );
 
     const readOrganizationResult: Organization | null =
-      await this.#organizationRepository.findOne(account.organizationId, this.#dbConnection);
+      await this.#organizationRepository.findOne(
+        account.organizationId,
+        this.#dbConnection
+      );
 
     if (!readOrganizationResult)
       return Promise.reject(
@@ -100,7 +108,7 @@ export class CreateAccount
   #createAccount = (request: CreateAccountRequestDto): Account => {
     const accountProperties: AccountProperties = {
       id: new ObjectId().toHexString(),
-      userId: request.userId,
+      userId: request.targetUserId,
       organizationId: request.targetOrganizationId,
     };
 

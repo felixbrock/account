@@ -2,8 +2,7 @@ import { Account } from '../entities/account';
 import { DbConnection } from '../services/i-db';
 
 export interface AccountQueryDto {
-  userId?: string;
-  organizationId?: string;
+  userId: string;
   modifiedOnStart?: number;
   modifiedOnEnd?: number;
 }

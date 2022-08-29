@@ -48,6 +48,7 @@ export default class ReadAccountsController extends BaseController {
       );
 
     return {
+      targetUserId: typeof userId === 'string' ? userId : undefined,
       modifiedOnStart:
         typeof modifiedOnStart === 'string'
           ? this.#buildDate(modifiedOnStart)
@@ -91,11 +92,10 @@ export default class ReadAccountsController extends BaseController {
     return !validationResults.includes(false);
   };
 
-  #buildAuthDto = (userAccountInfo: UserAccountInfo): ReadAccountsAuthDto => {
-    if (!userAccountInfo.userId) throw new Error('Unauthorized');
-
-    return { userId: userAccountInfo.userId };
-  };
+  #buildAuthDto = (userAccountInfo: UserAccountInfo): ReadAccountsAuthDto => ({
+    callerUserId: userAccountInfo.userId,
+    isSystemInternal: userAccountInfo.isSystemInternal,
+  });
 
   protected async executeImpl(req: Request, res: Response): Promise<Response> {
     try {
@@ -109,7 +109,8 @@ export default class ReadAccountsController extends BaseController {
       const getUserAccountInfoResult: Result<UserAccountInfo> =
         await ReadAccountsController.getUserAccountInfo(
           jwt,
-          this.#readAccounts, this.#dbo.dbConnection
+          this.#readAccounts,
+          this.#dbo.dbConnection
         );
 
       if (!getUserAccountInfoResult.success)
@@ -127,7 +128,11 @@ export default class ReadAccountsController extends BaseController {
       const authDto: ReadAccountsAuthDto = this.#buildAuthDto(userAccountInfo);
 
       const useCaseResult: ReadAccountsResponseDto =
-        await this.#readAccounts.execute(buildDtoResult, authDto, this.#dbo.dbConnection);
+        await this.#readAccounts.execute(
+          buildDtoResult,
+          authDto,
+          this.#dbo.dbConnection
+        );
 
       if (!useCaseResult.success) {
         return ReadAccountsController.badRequest(res, useCaseResult.error);

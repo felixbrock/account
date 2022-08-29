@@ -100,7 +100,11 @@ export abstract class BaseController {
         });
 
       const readAccountsResult: ReadAccountsResponseDto =
-        await readAccounts.execute({}, { userId: authPayload.username }, dbConnection);
+        await readAccounts.execute(
+          { targetUserId: authPayload.username },
+          { isSystemInternal: true },
+          dbConnection
+        );
 
       if (!readAccountsResult.value)
         throw new Error(`No account found for ${authPayload.username}`);

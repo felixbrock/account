@@ -8,10 +8,12 @@ import { DbConnection } from '../services/i-db';
 export interface ReadAccountsRequestDto {
   modifiedOnStart?: number;
   modifiedOnEnd?: number;
+  targetUserId?: string;
 }
 
 export interface ReadAccountsAuthDto {
-  userId: string;
+  callerUserId?: string;
+  isSystemInternal: boolean;
 }
 
 export type ReadAccountsResponseDto = Result<AccountDto[]>;
@@ -39,10 +41,24 @@ export class ReadAccounts
     dbConnection: DbConnection
   ): Promise<ReadAccountsResponseDto> {
     try {
+      if (auth.isSystemInternal && !request.targetUserId)
+        throw new Error('Target user id missing');
+      if (!auth.isSystemInternal && !auth.callerUserId)
+        throw new Error('Caller user id missing');
+      if (!request.targetUserId && !auth.callerUserId)
+        throw new Error('No user Id instance provided');
+
+      let userId: string;
+      if (auth.isSystemInternal && request.targetUserId)
+        userId = request.targetUserId;
+      else if (auth.callerUserId)
+        userId = auth.callerUserId;
+      else throw new Error('Unhandled organizationId allocation');
+
       this.#dbConnection = dbConnection;
 
       const accounts: Account[] = await this.#accountRepository.findBy(
-        this.#buildAccountQueryDto(request, auth),
+        this.#buildAccountQueryDto(request, userId),
         this.#dbConnection
       );
       if (!accounts) throw new Error(`Queried accounts do not exist`);
@@ -57,11 +73,10 @@ export class ReadAccounts
 
   #buildAccountQueryDto = (
     request: ReadAccountsRequestDto,
-    auth: ReadAccountsAuthDto
+    userId: string
   ): AccountQueryDto => {
-    const queryDto: AccountQueryDto = {};
+    const queryDto: AccountQueryDto = { userId};
 
-    queryDto.userId = auth.userId;
     if (request.modifiedOnStart)
       queryDto.modifiedOnStart = request.modifiedOnStart;
     if (request.modifiedOnEnd) queryDto.modifiedOnEnd = request.modifiedOnEnd;

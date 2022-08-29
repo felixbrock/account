@@ -14,8 +14,7 @@ interface AccountPersistence {
 }
 
 interface AccountQueryFilter {
-  userId?: string;
-  organizationId?: string;
+  userId: string;
   modifiedOn?: { [key: string]: number };
 }
 
@@ -67,12 +66,7 @@ export default class AccountRepositoryImpl implements IAccountRepository {
   };
 
   #buildFilter = (accountQueryDto: AccountQueryDto): AccountQueryFilter => {
-    const filter: { [key: string]: any } = {};
-
-    if (accountQueryDto.userId) filter.userId = accountQueryDto.userId;
-
-    if (accountQueryDto.organizationId)
-      filter.organizationId = accountQueryDto.organizationId;
+    const filter: AccountQueryFilter = {userId: accountQueryDto.userId};
 
     const modifiedOnFilter: { [key: string]: number } = {};
     if (accountQueryDto.modifiedOnStart)
