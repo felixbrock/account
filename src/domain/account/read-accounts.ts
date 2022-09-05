@@ -6,8 +6,8 @@ import Result from '../value-types/transient-types/result';
 import { DbConnection } from '../services/i-db';
 
 export interface ReadAccountsRequestDto {
-  modifiedOnStart?: number;
-  modifiedOnEnd?: number;
+  modifiedOnStart?: string;
+  modifiedOnEnd?: string;
   targetUserId?: string;
 }
 

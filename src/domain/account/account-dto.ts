@@ -4,7 +4,7 @@ export interface AccountDto {
   id: string;
   userId: string;
   organizationId: string;
-  modifiedOn: number;
+  modifiedOn: string;
 }
 
 export const buildAccountDto = (account: Account): AccountDto => ({

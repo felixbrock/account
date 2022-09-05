@@ -3,8 +3,8 @@ import { DbConnection } from '../services/i-db';
 
 export interface AccountQueryDto {
   userId: string;
-  modifiedOnStart?: number;
-  modifiedOnEnd?: number;
+  modifiedOnStart?: string;
+  modifiedOnEnd?: string;
 }
 
 export interface IAccountRepository {

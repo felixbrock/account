@@ -3,7 +3,7 @@ import { Organization } from '../entities/organization';
 export interface OrganizationDto {
   id: string;
   name: string;
-  modifiedOn: number;
+  modifiedOn: string;
 }
 
 export const buildOrganizationDto = (organization: Organization): OrganizationDto => ({

@@ -10,8 +10,8 @@ import { OrganizationDto, buildOrganizationDto } from './organization-dto';
 
 export interface ReadOrganizationsRequestDto {
   name?: string;
-  modifiedOnStart?: number;
-  modifiedOnEnd?: number;
+  modifiedOnStart?: string;
+  modifiedOnEnd?: string;
 }
 
 export interface ReadOrganizationsAuthDto {

@@ -1,7 +1,7 @@
 export interface OrganizationProperties {
   id: string;
   name: string;
-  modifiedOn?: number;
+  modifiedOn?: string;
 }
 
 export class Organization {
@@ -9,7 +9,7 @@ export class Organization {
 
   #name: string;
 
-  #modifiedOn: number;
+  #modifiedOn: string;
 
   get id(): string {
     return this.#id;
@@ -19,18 +19,18 @@ export class Organization {
     return this.#name;
   }
 
-  get modifiedOn(): number {
+  get modifiedOn(): string {
     return this.#modifiedOn;
   }
 
-  set modifiedOn(modifiedOn: number) {
+  set modifiedOn(modifiedOn: string) {
     this.#modifiedOn = modifiedOn;
   }
 
   private constructor(properties: OrganizationProperties) {
     this.#id = properties.id;
     this.#name = properties.name;
-    this.#modifiedOn = properties.modifiedOn || Date.now();
+    this.#modifiedOn = properties.modifiedOn || new Date().toISOString();
   }
 
   static create(

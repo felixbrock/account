@@ -3,7 +3,7 @@ export interface AccountProperties {
   id: string;
   userId: string;
   organizationId: string;
-  modifiedOn?: number;
+  modifiedOn?: string;
 }
 
 export class Account {
@@ -13,7 +13,7 @@ export class Account {
 
   #organizationId: string;
 
-  #modifiedOn: number;
+  #modifiedOn: string;
 
   get id(): string {
     return this.#id;
@@ -27,11 +27,11 @@ export class Account {
     return this.#organizationId;
   }
 
-  get modifiedOn(): number {
+  get modifiedOn(): string {
     return this.#modifiedOn;
   }
 
-  set modifiedOn(modifiedOn: number) {
+  set modifiedOn(modifiedOn: string) {
     this.#modifiedOn = modifiedOn;
   }
 
@@ -39,7 +39,7 @@ export class Account {
     this.#id = properties.id;
     this.#userId = properties.userId;
     this.#organizationId = properties.organizationId;
-    this.#modifiedOn = properties.modifiedOn || Date.now();
+    this.#modifiedOn = properties.modifiedOn || new Date().toISOString();
   }
 
   static create(

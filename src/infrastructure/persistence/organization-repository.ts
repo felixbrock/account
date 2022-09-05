@@ -12,12 +12,12 @@ import {
 interface OrganizationPersistence {
   _id: string;
   name: string;
-  modifiedOn: number;
+  modifiedOn: string;
 }
 
 interface OrganizationQueryFilter {
   name?: string;
-  modifiedOn?: { [key: string]: number };
+  modifiedOn?: { [key: string]: string };
 }
 
 const collectionName = 'organizations';
@@ -75,14 +75,6 @@ export default class OrganizationRepositoryImpl
     const filter: { [key: string]: any } = {};
 
     if (organizationQueryDto.name) filter.name = organizationQueryDto.name;
-
-    const modifiedOnFilter: { [key: string]: number } = {};
-    if (organizationQueryDto.modifiedOnStart)
-      modifiedOnFilter.$gte = organizationQueryDto.modifiedOnStart;
-    if (organizationQueryDto.modifiedOnEnd)
-      modifiedOnFilter.$lte = organizationQueryDto.modifiedOnEnd;
-    if (Object.keys(modifiedOnFilter).length)
-      filter.modifiedOn = modifiedOnFilter;
 
     return filter;
   };
