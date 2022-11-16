@@ -34,16 +34,16 @@ export default class ReadOrganizationController extends BaseController {
   }
 
   #buildRequestDto = (httpRequest: Request): ReadOrganizationRequestDto => ({
-    targetOrganizationId: httpRequest.params.organizationId,
+    targetOrgId: httpRequest.params.organizationId,
   });
 
   #buildAuthDto = (
     userAccountInfo: UserAccountInfo
   ): ReadOrganizationAuthDto => {
-    if (!userAccountInfo.callerOrganizationId) throw new Error('Unauthorized');
+    if (!userAccountInfo.callerOrgId) throw new Error('Unauthorized');
 
     return {
-      callerOrganizationId: userAccountInfo.callerOrganizationId,
+      callerOrgId: userAccountInfo.callerOrgId,
       isSystemInternal: userAccountInfo.isSystemInternal,
     };
   };

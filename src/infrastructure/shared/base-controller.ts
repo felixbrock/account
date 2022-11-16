@@ -23,7 +23,7 @@ export enum CodeHttp {
 export interface UserAccountInfo {
   userId?: string;
   accountId?: string;
-  callerOrganizationId?: string;
+  callerOrgId?: string;
   isAdmin: boolean;
   isSystemInternal: boolean;
 }
@@ -94,7 +94,7 @@ export abstract class BaseController {
         return Result.ok({
           userId: undefined,
           accountId: undefined,
-          callerOrganizationId: undefined,
+          callerOrgId: undefined,
           isAdmin,
           isSystemInternal,
         });
@@ -114,7 +114,7 @@ export abstract class BaseController {
       return Result.ok({
         userId: authPayload.username,
         accountId: readAccountsResult.value[0].id,
-        callerOrganizationId: readAccountsResult.value[0].organizationId,
+        callerOrgId: readAccountsResult.value[0].organizationId,
         isAdmin,
         isSystemInternal,
       });

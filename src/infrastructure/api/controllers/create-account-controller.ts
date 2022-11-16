@@ -31,7 +31,7 @@ export default class CreateAccountController extends BaseController {
 
   #buildRequestDto = (httpRequest: Request): CreateAccountRequestDto => ({
     targetUserId: httpRequest.body.userId,
-    targetOrganizationId: httpRequest.body.organizationId,
+    targetOrgId: httpRequest.body.organizationId,
   });
 
   #buildAuthDto = (userAccountInfo: UserAccountInfo): CreateAccountAuthDto => ({

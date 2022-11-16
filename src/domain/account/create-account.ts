@@ -11,7 +11,7 @@ import { DbConnection } from '../services/i-db';
 
 export interface CreateAccountRequestDto {
   targetUserId: string;
-  targetOrganizationId: string;
+  targetOrgId: string;
 }
 
 export interface CreateAccountAuthDto {
@@ -109,7 +109,7 @@ export class CreateAccount
     const accountProperties: AccountProperties = {
       id: new ObjectId().toHexString(),
       userId: request.targetUserId,
-      organizationId: request.targetOrganizationId,
+      organizationId: request.targetOrgId,
     };
 
     return Account.create(accountProperties);
